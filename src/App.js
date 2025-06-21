@@ -32,6 +32,11 @@ import CheckListPage from "./Components/checklist/CheckListPage";
 import SellerDashboard from "./Components/SellerDashboard";
 import CustomerDashboard from "./Components/CustomerDashboard";
 import ProductPageAfterSearch from "./Components/ProductPageAfterSearch";
+import AmazonReviewForm from "./Components/AmazonReviewForm";
+// import { Amplify } from 'aws-amplify';
+// import awsconfig from './aws-exports'; // or your config file
+
+// Amplify.configure(awsconfig);
 
 const cartFromLocalStorage = JSON.parse(
   localStorage.getItem("cart") || '{"items":[],"count":0}'
@@ -178,6 +183,16 @@ function App() {
             element={
               <>
                 <Login />
+              </>
+            }
+          />
+          <Route
+            path="/reviewform"
+            element={
+              <>
+                <NavBar />
+                <AmazonReviewForm />
+                <Footer />
               </>
             }
           />
