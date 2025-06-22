@@ -1,7 +1,9 @@
 import axios from "axios";
 
-const TEXT_REVIEW_URL = "https://fftet7pfwk.execute-api.ap-south-1.amazonaws.com/prod";
-const AUDIO_S3_GENERATE_URL = "https://mg8vke2yk8.execute-api.ap-south-1.amazonaws.com/prod/audio-reviews";
+const TEXT_REVIEW_URL =
+  "https://fftet7pfwk.execute-api.ap-south-1.amazonaws.com/prod";
+const AUDIO_S3_GENERATE_URL =
+  "https://mg8vke2yk8.execute-api.ap-south-1.amazonaws.com/prod/audio-reviews";
 
 // Text review submission
 export async function submitTextReview({
@@ -106,13 +108,13 @@ export async function getTrustScore(productId, description) {
     const response = await axios.post(
       "https://t79ov3wv80.execute-api.ap-south-1.amazonaws.com/prod/check",
       {
-        product_id: 'oneplus13',
+        product_id: "oneplus13",
         //description: description,
-        amazon_url: `https://www.gsmarena.com/oneplus_13-13477.php${productId}`,
-        official_url: `https://www.gsmarena.com/oneplus_13-13477.php/${productId}`
+        amazon_url: `https://amazon.in/${productId}`,
+        official_url: `https://www.gsmarena.com/oneplus_13-13477.php/${productId}`,
       }
     );
-    
+
     // Extract score from response
     const responseBody = JSON.parse(response.data.body);
     const scoreMatch = responseBody.match(/AI Score: (\d+)/);
@@ -128,7 +130,7 @@ export async function getDescriptionScore(description) {
   try {
     const response = await axios.post(
       "https://t79ov3wv80.execute-api.ap-south-1.amazonaws.com/prod/check",
-      { text: Array.isArray(description) ? description.join(' ') : description }
+      { text: Array.isArray(description) ? description.join(" ") : description }
     );
     // The API returns { statusCode: 200, body: "\"Success! AI Score: 0\"" }
     if (response.data && response.data.body) {
@@ -150,4 +152,3 @@ export async function getDescriptionScore(description) {
     return 0;
   }
 }
-
