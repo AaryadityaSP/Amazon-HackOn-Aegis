@@ -125,7 +125,7 @@ const products = [
     image: oneplus13image1,
     rating: {
       rate: 4.7,
-      count: 100,
+      count: 204,
     },
   },
   {
@@ -169,8 +169,8 @@ const products = [
     category: "mobiles",
     image: oneplus13image2,
     rating: {
-      rate: 4.8,
-      count: 150,
+      rate: 4.7,
+      count: 153,
     },
   },
   {
@@ -214,8 +214,8 @@ const products = [
     category: "mobiles",
     image: oneplus13image3,
     rating: {
-      rate: 4.7,
-      count: 120,
+      rate: 4.6,
+      count: 142,
     },
   },
   {
@@ -260,7 +260,7 @@ const products = [
     image: oneplus13image4,
     rating: {
       rate: 4.6,
-      count: 110,
+      count: 100,
     },
   },
   {
@@ -304,8 +304,8 @@ const products = [
     category: "mobiles",
     image: oneplus13image5,
     rating: {
-      rate: 4.7,
-      count: 140,
+      rate: 4.5,
+      count: 168,
     },
   },
   {
@@ -349,8 +349,8 @@ const products = [
     category: "mobiles",
     image: oneplus13image6,
     rating: {
-      rate: 4.8,
-      count: 115,
+      rate: 4.5,
+      count: 132,
     },
   },
   {
@@ -394,8 +394,8 @@ const products = [
     category: "mobiles",
     image: oneplus13image7,
     rating: {
-      rate: 5.0,
-      count: 40,
+      rate: 3.0,
+      count: 24,
     },
   },
   {
@@ -439,8 +439,8 @@ const products = [
     category: "mobiles",
     image: oneplus13image8,
     rating: {
-      rate: 5.0,
-      count: 38,
+      rate: 3.0,
+      count: 20,
     },
   },
   {
@@ -484,8 +484,8 @@ const products = [
     category: "mobiles",
     image: oneplus13image9,
     rating: {
-      rate: 4.9,
-      count: 33,
+      rate: 2.5,
+      count: 17,
     },
   },
   {
@@ -529,8 +529,8 @@ const products = [
     category: "mobiles",
     image: oneplus13image10,
     rating: {
-      rate: 4.9,
-      count: 25,
+      rate: 2.0,
+      count: 12,
     },
   },
 ];
