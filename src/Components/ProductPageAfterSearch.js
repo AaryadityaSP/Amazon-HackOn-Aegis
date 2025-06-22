@@ -1,13 +1,12 @@
-import React from "react";
+import React, { useState, useEffect } from 'react';
+import { CircularProgress, Box, Typography, Chip } from '@mui/material';
+import axios from "axios";
 import {
-  Box,
   Grid,
-  Typography,
   Button,
   Card,
   CardMedia,
   CardContent,
-  Chip,
   Avatar,
   Divider,
   IconButton,
@@ -29,7 +28,96 @@ import lenevobannerimage from "../Assets/images/lenevo banner image.jpg";
 import onepluslogo from "../Assets/images/one plus logo.jpg";
 import boultlogo from "../Assets/images/boult logo.jpg";
 import lenevologo from "../Assets/images/lenevo logo.jpg";
+import oneplus13image1 from "../Assets/images/oneplus13image1.jpg";
+import oneplus13image2 from "../Assets/images/oneplus13image2.jpg";
+import oneplus13image3 from "../Assets/images/oneplus13image3.jpg";
+import oneplus13image4 from "../Assets/images/oneplus13image4.jpg";
+import oneplus13image5 from "../Assets/images/oneplus13image5.jpg";
+import oneplus13image6 from "../Assets/images/oneplus13image6.jpg";
+import oneplus13image7 from "../Assets/images/oneplus13image7.jpg";
+import oneplus13image8 from "../Assets/images/oneplus13image8.jpg";
+import oneplus13image9 from "../Assets/images/oneplus13image9.jpg";
+import oneplus13image10 from "../Assets/images/oneplus13image10.jpg";
+const DESCRIPTION_API = "https://t79ov3wv80.execute-api.ap-south-1.amazonaws.com/prod/check";
 
+// Description Analyzer Component
+const DescriptionAnalyzer = ({ description }) => {
+  const [score, setScore] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    if (description && description.length > 0) {
+      analyzeDescription();
+    }
+  }, [description]);
+
+  const analyzeDescription = async () => {
+    setLoading(true);
+    try {
+      // Combine description array into single string
+      const descriptionText = description.join(' ');
+      
+      const response = await axios.post(DESCRIPTION_API, {
+        text: descriptionText
+      });
+      
+      // Extract score from response
+      if (response.data && typeof response.data.score === 'number') {
+        setScore(Math.round(response.data.score));
+      } else {
+        throw new Error('Invalid response format');
+      }
+    } catch (err) {
+      console.error("Description analysis error:", err);
+      setError('Failed to analyze description');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getScoreColor = () => {
+    if (!score) return '#9e9e9e';
+    if (score >= 80) return '#4CAF50'; // Green
+    if (score >= 60) return '#FFC107'; // Yellow
+    return '#F44336'; // Red
+  };
+
+  return (
+    <Box sx={{ mt: 1 }}>
+      {loading && (
+        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          <CircularProgress size={20} />
+          <Typography variant="body2" sx={{ ml: 1 }}>
+            Analyzing description quality...
+          </Typography>
+        </Box>
+      )}
+      
+      {error && (
+        <Typography variant="body2" color="error">
+          {error}
+        </Typography>
+      )}
+      
+      {!loading && score !== null && (
+        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          <Typography variant="body2" sx={{ mr: 1, fontWeight: 500 }}>
+            Description Quality:
+          </Typography>
+          <Chip 
+            label={`${score}%`} 
+            sx={{ 
+              backgroundColor: getScoreColor(),
+              color: 'white',
+              fontWeight: 'bold'
+            }} 
+          />
+        </Box>
+      )}
+    </Box>
+  );
+};
 // Dummy Data
 const filters = {
   brands: [
@@ -45,31 +133,6 @@ const filters = {
   ram: ["4 to 5.9 GB", "6 to 7.9 GB", "8 to 9.9 GB", "10 GB & Above"],
   // ...Add all filter options as needed
 };
-
-const products = [
-  {
-    id: 1,
-    title:
-      "OnePlus 13 | Smarter with OnePlus AI | Lifetime Display Warranty (12GB RAM, 256GB Storage Midnight Ocean)",
-    image: "/images/oneplus13-blue.jpg",
-    price: 69997,
-    mrp: 72999,
-    deal: "Limited time deal",
-    prime: true,
-    rating: 4.5,
-    reviews: 1244,
-    bought: "500+ bought in past month",
-    delivery: "FREE delivery Sun, 22 Jun",
-    fastDelivery: "Or fastest delivery Tomorrow, 21 Jun",
-    variants: [
-      { color: "ocean" },
-      { color: "arctic-dawn" },
-      { color: "black" },
-    ],
-  },
-  // ...Add more products as needed
-];
-
 const brandsRelated = [
   {
     brand: "OnePlus",
@@ -83,6 +146,465 @@ const brandsRelated = [
     logoimage: `${lenevologo}`,
   },
 ];
+
+const products = [
+  {
+    id: 1,
+    title: "OnePlus 13 (16GB RAM, 512GB) - Midnight Ocean",
+    price: 76999,
+    mrp: 99999,
+    description: {
+      about: [
+        "Flagship power made smarter with Qualcomm Snapdragon 8 Elite Mobile Platform – the heart that powers the mind of OnePlus AI. With a faster Neural Engine, an improved CPU and GPU, and a big jump in memory bandwidth.",
+        "OxygenOS 15 - Experience the power of all-new OnePlus AI. Search smarter, crank up your creativity, and power your productivity for a smoother digital life.",
+        "5th-Gen Hasselblad Camera for Mobile combines a flagship 50MP triple camera system – Wide 50MP Sony's LYT-808 with OIS, 3X Triprism Telephoto 50MP and an Ultra-wide 50MP (120° Fov, 1/2.75 sensor size sensor.",
+        "The all-new, record-breaking 2K ProXDR Display. Achieving an industry-first DisplayMate A++. Open your eyes to a new level of color accuracy, brightness and color depth.",
+        "Durability meets elegance with an IP69 and IP68 rating – The design is forward-looking and future-proof. Experience the industry's highest levels of water and dust resistance wherever your journey takes you.",
+        "Ultra-slim OnePlus Silicon NanoStack Battery – Our biggest battery ever, at 6000 mAh. Amp up your power with 100W wired fast charging, delivering up to 100% charge in 36 minutes, 50W wireless fast charging, for up to 50% charge in 34 minutes.",
+      ],
+      product_details: {
+        Brand_Name: "OnePlus",
+        Model_Year: "2025",
+        Box_Contents:
+          "Power Adapter, SIM Tray Ejector, Phone Case, Screen Protector, USB Cable",
+        Battery_Capacity: "6000 mAh (Silicon-Carbon)",
+        Battery_Charge_Time:
+          "36 Minutes (100W Wired), 34 Minutes (50W Wireless)",
+        Display:
+          "6.82-inch 2K ProXDR AMOLED, 3168 x 1440, 120Hz, DisplayMate A++",
+        Processor: "Qualcomm Snapdragon 8 Elite, 3.2 GHz Octa-core",
+        RAM: "16GB",
+        Storage: "512GB",
+        Operating_System: "OxygenOS 15 (Android 15)",
+        Camera: "50MP + 50MP + 50MP Hasselblad Triple Rear, 32MP Front",
+        Camera_Features:
+          "Wide (Sony LYT-808, OIS), 3X Triprism Telephoto, Ultra-wide (120° FOV), Landscape, Macro, Night, Telephoto, Portrait, Automatic",
+        Video: "4K Recording",
+        SIM: "Dual SIM (Nano), 5G Supported",
+        Network: "Unlocked for All Carriers, LTE, USB Type C",
+        Water_Resistance: "IP69 & IP68",
+        Dimensions: "16.3 x 7.7 x 0.9 cm",
+        Weight: "210 grams",
+        Security: "Fingerprint Recognition, Face Unlock",
+        Headphone_Jack: "3.5 mm",
+        Warranty:
+          "1 year manufacturer warranty for device and 6 months manufacturer warranty for in-box accessories including batteries from the date of purchase",
+      },
+    },
+    category: "mobiles",
+    image: oneplus13image1,
+    rating: {
+      rate: 4.7,
+      count: 100,
+    },
+  },
+  {
+    id: 2,
+    title: "OnePlus 13 (16GB RAM, 512GB) - Black Eclipse",
+    price: 76999,
+    mrp: 99999,
+    description: {
+      about: [
+        "Flagship power made smarter with Qualcomm Snapdragon 8 Elite Mobile Platform and enhanced AI experiences.",
+        "OxygenOS 15 for seamless multitasking and advanced AI features.",
+        "5th-Gen Hasselblad Camera: 50MP Sony LYT-808 wide, 50MP 3X Triprism telephoto, 50MP ultra-wide (120° FOV).",
+        "2K ProXDR Display with DisplayMate A++, ultra-high color accuracy and brightness.",
+        "IP69/IP68 rated for top-tier water and dust resistance.",
+        "6000 mAh Silicon NanoStack battery, 100W wired and 50W wireless fast charging.",
+      ],
+      product_details: {
+        Brand_Name: "OnePlus",
+        Model_Year: "2025",
+        Box_Contents: "Power Adapter, SIM Tray Ejector, Case, USB Cable",
+        Battery_Capacity: "6000 mAh",
+        Battery_Charge_Time: "36 min (wired), 34 min (wireless)",
+        Display: "6.82-inch 2K ProXDR AMOLED, 120Hz",
+        Processor: "Snapdragon 8 Elite",
+        RAM: "16GB",
+        Storage: "512GB",
+        Operating_System: "OxygenOS 15 (Android 15)",
+        Camera: "Triple 50MP Hasselblad Rear, 32MP Front",
+        Camera_Features: "OIS, 3X Telephoto, 120° Ultra-wide",
+        Video: "4K",
+        SIM: "Dual SIM, 5G",
+        Network: "Unlocked, USB Type C",
+        Water_Resistance: "IP69 & IP68",
+        Dimensions: "16.3 x 7.7 x 0.9 cm",
+        Weight: "210g",
+        Security: "Fingerprint, Face Unlock",
+        Headphone_Jack: "No",
+        Warranty: "1 year device, 6 months accessories",
+      },
+    },
+    category: "mobiles",
+    image: oneplus13image2,
+    rating: {
+      rate: 4.8,
+      count: 150,
+    },
+  },
+  {
+    id: 3,
+    title: "OnePlus 13 (16GB RAM, 512GB) - Arctic Dawn",
+    price: 76999,
+    mrp: 99999,
+    description: {
+      about: [
+        "Snapdragon 8 Elite Mobile Platform with advanced OnePlus AI for smarter performance.",
+        "OxygenOS 15 delivers a smooth, intelligent software experience.",
+        "Triple 50MP Hasselblad camera system with wide, telephoto, and ultra-wide sensors.",
+        "2K ProXDR AMOLED display, DisplayMate A++ certified.",
+        "IP69/IP68 water and dust resistance for ultimate durability.",
+        "6000 mAh battery, 100W wired, 50W wireless fast charging.",
+      ],
+      product_details: {
+        Brand_Name: "OnePlus",
+        Model_Year: "2025",
+        Box_Contents: "Charger, Case, USB Cable, SIM Tool",
+        Battery_Capacity: "6000 mAh",
+        Battery_Charge_Time: "36 min (wired), 34 min (wireless)",
+        Display: "6.82-inch 2K ProXDR AMOLED, 120Hz",
+        Processor: "Snapdragon 8 Elite",
+        RAM: "16GB",
+        Storage: "512GB",
+        Operating_System: "OxygenOS 15",
+        Camera: "Triple 50MP Hasselblad, 32MP Front",
+        Camera_Features: "OIS, Telephoto, Ultra-wide",
+        Video: "4K",
+        SIM: "Dual SIM, 5G",
+        Network: "Unlocked, USB Type C",
+        Water_Resistance: "IP69 & IP68",
+        Dimensions: "16.3 x 7.7 x 0.9 cm",
+        Weight: "210g",
+        Security: "Fingerprint, Face Unlock",
+        Headphone_Jack: "No",
+        Warranty: "1 year device, 6 months accessories",
+      },
+    },
+    category: "mobiles",
+    image: oneplus13image3,
+    rating: {
+      rate: 4.7,
+      count: 120,
+    },
+  },
+  {
+    id: 4,
+    title: "OnePlus 13 (12GB RAM, 256GB) - Midnight Ocean",
+    price: 69999,
+    mrp: 99999,
+    description: {
+      about: [
+        "Experience flagship performance with Snapdragon 8 Elite and OnePlus AI.",
+        "OxygenOS 15 for smooth, intelligent operation.",
+        "Triple 50MP Hasselblad camera system for pro-level photography.",
+        "2K ProXDR AMOLED display, DisplayMate A++.",
+        "IP69/IP68 rated for best-in-class durability.",
+        "6000 mAh battery, 100W wired, 50W wireless fast charging.",
+      ],
+      product_details: {
+        Brand_Name: "OnePlus",
+        Model_Year: "2025",
+        Box_Contents: "Charger, Case, USB Cable, SIM Tool",
+        Battery_Capacity: "6000 mAh",
+        Battery_Charge_Time: "36 min (wired), 34 min (wireless)",
+        Display: "6.82-inch 2K ProXDR AMOLED, 120Hz",
+        Processor: "Snapdragon 8 Elite",
+        RAM: "12GB",
+        Storage: "256GB",
+        Operating_System: "OxygenOS 15",
+        Camera: "Triple 50MP Hasselblad, 32MP Front",
+        Camera_Features: "OIS, Telephoto, Ultra-wide",
+        Video: "4K",
+        SIM: "Dual SIM, 5G",
+        Network: "Unlocked, USB Type C",
+        Water_Resistance: "IP69 & IP68",
+        Dimensions: "16.3 x 7.7 x 0.9 cm",
+        Weight: "210g",
+        Security: "Fingerprint, Face Unlock",
+        Headphone_Jack: "No",
+        Warranty: "1 year device, 6 months accessories",
+      },
+    },
+    category: "mobiles",
+    image: oneplus13image4,
+    rating: {
+      rate: 4.6,
+      count: 110,
+    },
+  },
+  {
+    id: 5,
+    title: "OnePlus 13 (12GB RAM, 256GB) - Black Eclipse",
+    price: 69999,
+    mrp: 99999,
+    description: {
+      about: [
+        "Snapdragon 8 Elite Mobile Platform with next-gen OnePlus AI.",
+        "OxygenOS 15 for a seamless, creative, and productive experience.",
+        "Flagship 50MP Hasselblad triple camera system.",
+        "2K ProXDR AMOLED display, DisplayMate A++.",
+        "IP69/IP68 water and dust resistance.",
+        "6000 mAh battery, 100W wired, 50W wireless fast charging.",
+      ],
+      product_details: {
+        Brand_Name: "OnePlus",
+        Model_Year: "2025",
+        Box_Contents: "Charger, USB Cable, Case, SIM Tool",
+        Battery_Capacity: "6000 mAh",
+        Battery_Charge_Time: "36 min (wired), 34 min (wireless)",
+        Display: "6.82-inch 2K ProXDR AMOLED, 120Hz",
+        Processor: "Snapdragon 8 Elite",
+        RAM: "12GB",
+        Storage: "256GB",
+        Operating_System: "OxygenOS 15",
+        Camera: "Triple 50MP Hasselblad, 32MP Front",
+        Camera_Features: "OIS, Telephoto, Ultra-wide",
+        Video: "4K",
+        SIM: "Dual SIM, 5G",
+        Network: "Unlocked, USB Type C",
+        Water_Resistance: "IP69 & IP68",
+        Dimensions: "16.3 x 7.7 x 0.9 cm",
+        Weight: "210g",
+        Security: "Fingerprint, Face Unlock",
+        Headphone_Jack: "No",
+        Warranty: "1 year device, 6 months accessories",
+      },
+    },
+    category: "mobiles",
+    image: oneplus13image5,
+    rating: {
+      rate: 4.7,
+      count: 140,
+    },
+  },
+  {
+    id: 6,
+    title: "OnePlus 13 (12GB RAM, 256GB) - Arctic Dawn",
+    price: 69999,
+    mrp: 99999,
+    description: {
+      about: [
+        "Flagship power with Snapdragon 8 Elite and the latest OnePlus AI.",
+        "OxygenOS 15 for a smarter, faster phone experience.",
+        "5th-Gen Hasselblad Camera: 50MP triple camera system.",
+        "2K ProXDR AMOLED display, DisplayMate A++.",
+        "IP69/IP68 water and dust resistance.",
+        "6000 mAh battery, 100W wired, 50W wireless fast charging.",
+      ],
+      product_details: {
+        Brand_Name: "OnePlus",
+        Model_Year: "2025",
+        Box_Contents: "Charger, USB Cable, Case, SIM Tool",
+        Battery_Capacity: "6000 mAh",
+        Battery_Charge_Time: "36 min (wired), 34 min (wireless)",
+        Display: "6.82-inch 2K ProXDR AMOLED, 120Hz",
+        Processor: "Snapdragon 8 Elite",
+        RAM: "12GB",
+        Storage: "256GB",
+        Operating_System: "OxygenOS 15",
+        Camera: "Triple 50MP Hasselblad, 32MP Front",
+        Camera_Features: "OIS, Telephoto, Ultra-wide",
+        Video: "4K",
+        SIM: "Dual SIM, 5G",
+        Network: "Unlocked, USB Type C",
+        Water_Resistance: "IP69 & IP68",
+        Dimensions: "16.3 x 7.7 x 0.9 cm",
+        Weight: "210g",
+        Security: "Fingerprint, Face Unlock",
+        Headphone_Jack: "No",
+        Warranty: "1 year device, 6 months accessories",
+      },
+    },
+    category: "mobiles",
+    image: oneplus13image6,
+    rating: {
+      rate: 4.8,
+      count: 115,
+    },
+  },
+  {
+    id: 7,
+    title: "OnePlus 13 (24GB RAM, 1TB) - Midnight Ocean",
+    price: 89999,
+    mrp: 99999,
+    description: {
+      about: [
+        "Ultimate flagship: Snapdragon 8 Elite, OnePlus AI, 24GB RAM, 1TB storage.",
+        "OxygenOS 15 for next-level productivity and creativity.",
+        "Triple 50MP Hasselblad camera system for stunning shots.",
+        "2K ProXDR AMOLED display, DisplayMate A++.",
+        "IP69/IP68 water and dust resistance.",
+        "6000 mAh battery, 100W wired, 50W wireless fast charging.",
+      ],
+      product_details: {
+        Brand_Name: "OnePlus",
+        Model_Year: "2025",
+        Box_Contents: "Charger, USB Cable, Case, SIM Tool",
+        Battery_Capacity: "6000 mAh",
+        Battery_Charge_Time: "36 min (wired), 34 min (wireless)",
+        Display: "6.82-inch 2K ProXDR AMOLED, 120Hz",
+        Processor: "Snapdragon 8 Elite",
+        RAM: "24GB",
+        Storage: "1TB",
+        Operating_System: "OxygenOS 15",
+        Camera: "Triple 50MP Hasselblad, 32MP Front",
+        Camera_Features: "OIS, Telephoto, Ultra-wide",
+        Video: "4K",
+        SIM: "Dual SIM, 5G",
+        Network: "Unlocked, USB Type C",
+        Water_Resistance: "IP69 & IP68",
+        Dimensions: "16.3 x 7.7 x 0.9 cm",
+        Weight: "210g",
+        Security: "Fingerprint, Face Unlock",
+        Headphone_Jack: "No",
+        Warranty: "1 year device, 6 months accessories",
+      },
+    },
+    category: "mobiles",
+    image: oneplus13image7,
+    rating: {
+      rate: 5.0,
+      count: 40,
+    },
+  },
+  {
+    id: 8,
+    title: "OnePlus 13 (24GB RAM, 1TB) - Black Eclipse",
+    price: 89999,
+    mrp: 99999,
+    description: {
+      about: [
+        "Snapdragon 8 Elite, OnePlus AI, 24GB RAM, 1TB storage for ultimate performance.",
+        "OxygenOS 15 for a seamless, AI-powered experience.",
+        "5th-Gen Hasselblad Camera: 50MP triple camera system.",
+        "2K ProXDR AMOLED display, DisplayMate A++.",
+        "IP69/IP68 water and dust resistance.",
+        "6000 mAh battery, 100W wired, 50W wireless fast charging.",
+      ],
+      product_details: {
+        Brand_Name: "OnePlus",
+        Model_Year: "2025",
+        Box_Contents: "Charger, USB Cable, Case, SIM Tool",
+        Battery_Capacity: "6000 mAh",
+        Battery_Charge_Time: "36 min (wired), 34 min (wireless)",
+        Display: "6.82-inch 2K ProXDR AMOLED, 120Hz",
+        Processor: "Snapdragon 8 Elite",
+        RAM: "24GB",
+        Storage: "1TB",
+        Operating_System: "OxygenOS 15",
+        Camera: "Triple 50MP Hasselblad, 32MP Front",
+        Camera_Features: "OIS, Telephoto, Ultra-wide",
+        Video: "4K",
+        SIM: "Dual SIM, 5G",
+        Network: "Unlocked, USB Type C",
+        Water_Resistance: "IP69 & IP68",
+        Dimensions: "16.3 x 7.7 x 0.9 cm",
+        Weight: "210g",
+        Security: "Fingerprint, Face Unlock",
+        Headphone_Jack: "No",
+        Warranty: "1 year device, 6 months accessories",
+      },
+    },
+    category: "mobiles",
+    image: oneplus13image8,
+    rating: {
+      rate: 5.0,
+      count: 38,
+    },
+  },
+  {
+    id: 9,
+    title: "OnePlus 13 (24GB RAM, 1TB) - Arctic Dawn",
+    price: 89999,
+    mrp: 99999,
+    description: {
+      about: [
+        "Top-tier Snapdragon 8 Elite, OnePlus AI, 24GB RAM, 1TB storage.",
+        "OxygenOS 15 for a next-gen smartphone experience.",
+        "Triple 50MP Hasselblad camera system with AI enhancements.",
+        "2K ProXDR AMOLED display, DisplayMate A++.",
+        "IP69/IP68 water and dust resistance.",
+        "6000 mAh battery, 100W wired, 50W wireless fast charging.",
+      ],
+      product_details: {
+        Brand_Name: "OnePlus",
+        Model_Year: "2025",
+        Box_Contents: "Charger, USB Cable, Case, SIM Tool",
+        Battery_Capacity: "6000 mAh",
+        Battery_Charge_Time: "36 min (wired), 34 min (wireless)",
+        Display: "6.82-inch 2K ProXDR AMOLED, 120Hz",
+        Processor: "Snapdragon 8 Elite",
+        RAM: "24GB",
+        Storage: "1TB",
+        Operating_System: "OxygenOS 15",
+        Camera: "Triple 50MP Hasselblad, 32MP Front",
+        Camera_Features: "OIS, Telephoto, Ultra-wide",
+        Video: "4K",
+        SIM: "Dual SIM, 5G",
+        Network: "Unlocked, USB Type C",
+        Water_Resistance: "IP69 & IP68",
+        Dimensions: "16.3 x 7.7 x 0.9 cm",
+        Weight: "210g",
+        Security: "Fingerprint, Face Unlock",
+        Headphone_Jack: "No",
+        Warranty: "1 year device, 6 months accessories",
+      },
+    },
+    category: "mobiles",
+    image: oneplus13image9,
+    rating: {
+      rate: 4.9,
+      count: 33,
+    },
+  },
+  {
+    id: 10,
+    title: "OnePlus 13 Vegan Leather Edition (16GB RAM, 512GB) - Black Eclipse",
+    price: 78999,
+    mrp: 99999,
+    description: {
+      about: [
+        "Special Vegan Leather Edition in Black Eclipse with Snapdragon 8 Elite and OnePlus AI.",
+        "OxygenOS 15 for a creative, productive, and smooth experience.",
+        "Triple 50MP Hasselblad camera system for flagship photography.",
+        "2K ProXDR AMOLED display, DisplayMate A++.",
+        "IP69/IP68 water and dust resistance.",
+        "6000 mAh battery, 100W wired, 50W wireless fast charging.",
+      ],
+      product_details: {
+        Brand_Name: "OnePlus",
+        Model_Year: "2025",
+        Box_Contents: "Charger, USB Cable, Case, SIM Tool",
+        Battery_Capacity: "6000 mAh",
+        Battery_Charge_Time: "36 min (wired), 34 min (wireless)",
+        Display: "6.82-inch 2K ProXDR AMOLED, 120Hz",
+        Processor: "Snapdragon 8 Elite",
+        RAM: "16GB",
+        Storage: "512GB",
+        Operating_System: "OxygenOS 15",
+        Camera: "Triple 50MP Hasselblad, 32MP Front",
+        Camera_Features: "OIS, Telephoto, Ultra-wide",
+        Video: "4K",
+        SIM: "Dual SIM, 5G",
+        Network: "Unlocked, USB Type C",
+        Water_Resistance: "IP69 & IP68",
+        Dimensions: "16.3 x 7.7 x 0.9 cm",
+        Weight: "210g",
+        Security: "Fingerprint, Face Unlock",
+        Headphone_Jack: "No",
+        Warranty: "1 year device, 6 months accessories",
+      },
+    },
+    category: "mobiles",
+    image: oneplus13image10,
+    rating: {
+      rate: 4.9,
+      count: 25,
+    },
+  },
+];
+
 
 function FilterSidebar() {
   return (
@@ -168,10 +690,10 @@ function ProductCard({ product }) {
         <Box sx={{ display: "flex", alignItems: "center", mb: 0.5 }}>
           <StarIcon sx={{ color: "#FFA41C", fontSize: 18 }} />
           <Typography sx={{ ml: 0.5, fontWeight: 600 }}>
-            {product.rating}
+            {product.rating.rate}
           </Typography>
           <Typography sx={{ ml: 1, color: "#007185", fontSize: 14 }}>
-            {product.reviews.toLocaleString()} ratings
+            {product.rating.count} ratings
           </Typography>
         </Box>
         <Typography sx={{ color: "#565959", fontSize: 13, mb: 0.5 }}>
@@ -219,9 +741,10 @@ function ProductCard({ product }) {
             {product.delivery}
           </Typography>
           <Typography sx={{ fontSize: 14, color: "#111" }}>
-            {product.fastDelivery}
+            {product.fastDelivery}            
           </Typography>
         </Box>
+         {/* <DescriptionAnalyzer description={product.description.about} /> */}
         <Button
           variant="contained"
           color="warning"
@@ -232,7 +755,7 @@ function ProductCard({ product }) {
             borderRadius: 2,
             color: "#111",
             backgroundColor: "#ffd814",
-            borderRadius: 5
+            borderRadius: 5,
           }}
         >
           Add to cart
@@ -351,7 +874,17 @@ export default function ProductSearchPage() {
             Results
           </Typography>
           {products.map((p) => (
-            <ProductCard key={p.id} product={p} />
+            <Link
+              to={`/oneplus13/${p.id}`}
+              key={p.id}
+              style={{
+                textDecoration: "none",
+                color: "inherit",
+                display: "block",
+              }}
+            >
+              <ProductCard key={p.id} product={p} />
+            </Link>
           ))}
           {/* Pagination */}
           <Box sx={{ display: "flex", justifyContent: "center", my: 4 }}>

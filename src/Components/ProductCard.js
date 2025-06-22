@@ -40,9 +40,7 @@ const ProductCard = ({ item }) => {
           alignItems: "center",
           justifyContent: "center",
         }}
-      >
-        
-      </Box>
+      ></Box>
       <Typography
         sx={{
           height: "2rem",
@@ -64,9 +62,7 @@ const ProductCard = ({ item }) => {
           alignItems: "center",
         }}
       >
-        <Typography>
-          ₹ {rupeeCalculate(item.price * 79.67).toLocaleString()}
-        </Typography>
+        <Typography>₹ {rupeeCalculate(item.price * 79.67)}</Typography>
         <Box
           title={`${item.rating.rate} out of 5`}
           sx={{ display: "flex", alignItems: "center" }}

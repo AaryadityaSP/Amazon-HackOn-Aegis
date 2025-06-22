@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import {
   Box,
   AppBar,
@@ -11,87 +12,34 @@ import {
   CardContent,
   Avatar,
   Chip,
-  useTheme,
   InputBase,
   Menu,
   MenuItem,
-  Divider,
+  CircularProgress
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
-import BookmarkBorderIcon from "@mui/icons-material/BookmarkBorder";
 import SearchIcon from "@mui/icons-material/Search";
 import MailOutlineIcon from "@mui/icons-material/MailOutline";
 import SettingsIcon from "@mui/icons-material/Settings";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
-import amazonLogo from "../Assets/images/seller-central_logo-white.svg";
-import { Search, HelpOutline, MailOutline } from "@mui/icons-material";
-import StarBorderIcon from "@mui/icons-material/StarBorder";
-import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
-import LanguageIcon from "@mui/icons-material/Language";
-import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-  CartesianGrid,
+import { 
+  LineChart, 
+  Line, 
+  XAxis, 
+  YAxis, 
+  Tooltip, 
+  Legend, 
+  ResponsiveContainer, 
+  CartesianGrid 
 } from "recharts";
-
-// KPI Cards Data
-const kpis = [
-  { label: "MARKETPLACES", value: (
-    <>
-    <LanguageIcon 
-        sx={{ color: "#72bcd4", fontSize: 50, verticalAlign: "middle" }}
-    />
-    {" "}(1)
-    </>) },
-  { label: "ORDERS", value: 0 },
-  { label: "TODAY'S SALES", value: "₹0.00" },
-  { label: "BUYER MESSAGES", value: 0 },
-  { label: "BUY BOX WINS", value: "--" },
-  { label: "ACCOUNT HEALTH", value: "--" },
-  {
-    label: "CUSTOMER FEEDBACK",
-    value: (
-      <>
-        <StarBorderIcon
-          sx={{ color: "#FFD700", fontSize: 20, verticalAlign: "middle" }}
-        /><StarBorderIcon
-          sx={{ color: "#FFD700", fontSize: 20, verticalAlign: "middle" }}
-        /><StarBorderIcon
-          sx={{ color: "#FFD700", fontSize: 20, verticalAlign: "middle" }}
-        /><StarBorderIcon
-          sx={{ color: "#FFD700", fontSize: 20, verticalAlign: "middle" }}
-        /><StarBorderIcon
-          sx={{ color: "#FFD700", fontSize: 20, verticalAlign: "middle" }}
-        />{" "}
-        (0)
-      </>
-    ),
-  },
-  { label: "TOTAL BALANCE", value: "₹0.00" },
-];
-
-// Seller Analytics Data (Line Graph)
-const graphData = [
-  { month: "Jan", StockUnavailable: 2, Fraud: 1, GoodReviews: 5 },
-  { month: "Feb", StockUnavailable: 1, Fraud: 0, GoodReviews: 8 },
-  { month: "Mar", StockUnavailable: 3, Fraud: 2, GoodReviews: 7 },
-  { month: "Apr", StockUnavailable: 0, Fraud: 0, GoodReviews: 9 },
-  { month: "May", StockUnavailable: 1, Fraud: 1, GoodReviews: 10 },
-];
-
-// Seller Badge Data
-const badge = {
-  name: "Top Seller",
-  description: "Consistently high order fulfillment and positive feedback",
-  icon: <EmojiEventsIcon sx={{ color: "#f9a825" }} />,
-};
-
+import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
+import { getSellerDashboard, getSellerTrackRecord } from "../services/sellerService";
+import amazonLogo from "../Assets/images/seller-central_logo-white.svg";
+import BookmarkBorderIcon from "@mui/icons-material/BookmarkBorder";
+import { useNavigate } from "react-router-dom";
+import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
+// Static data for info cards
 // Info/Action Cards
 const infoCards = [
   {
@@ -105,7 +53,7 @@ const infoCards = [
     ),
     color: "#fff5f5",
     border: "#f44336",
-    icon: <MailOutline sx={{ color: "#f44336" }} />,
+    icon: <MailOutlineIcon sx={{ color: "#FFD814" }} />,
   },
   {
     title: "Launch Your Business",
@@ -122,23 +70,23 @@ const infoCards = [
     ),
     color: "#fffbe6",
     border: "#FFD814",
-    icon: <HelpOutline sx={{ color: "#FFD814" }} />,
+    icon: <HelpOutlineIcon sx={{ color: "#FFD814" }} />,
   },
   {
     title: "News",
     content: (
       <>
         <Typography variant="body2">
-          <b>6 JAN, 2023</b> Increase your chance to sell more and save more
+          <b>6 JAN, 2025</b> Increase your chance to sell more and save more
           during the Great... <a href="#">Read more</a>
         </Typography>
         <Typography variant="body2">
-          <b>5 JAN, 2023</b> Amazon STEP Evaluation for Q4 2022, from October 1
-          to December 31, 2022 <a href="#">Read more</a>
+          <b>5 JAN, 2025</b> Amazon STEP Evaluation for Q4 2024, from October 1
+          to December 31, 2024 <a href="#">Read more</a>
         </Typography>
         <Typography variant="body2">
-          <b>4 JAN, 2023</b> Tips for success during the Great Republic Day
-          Sale, 2023 <a href="#">Read more</a>
+          <b>4 JAN, 2025</b> Tips for success during the Great Republic Day
+          Sale, 2025 <a href="#">Read more</a>
         </Typography>
       </>
     ),
@@ -185,8 +133,8 @@ const infoCards = [
     content: (
       <>
         <Typography variant="body2">
-          <b>5 JAN, 2023</b> Amazon STEP Evaluation for Q4 2022, from October 1
-          to December 31, 2022 <a href="#">Read more</a>
+          <b>5 JAN, 2025</b> Amazon STEP Evaluation for Q4 2024, from October 1
+          to December 31, 2024 <a href="#">Read more</a>
         </Typography>
       </>
     ),
@@ -196,6 +144,7 @@ const infoCards = [
     icon: null,
   },
 ];
+
 function SellerNavBar() {
   const [anchorEl, setAnchorEl] = React.useState(null);
 
@@ -317,7 +266,14 @@ function SellerNavBar() {
             <SearchIcon />
           </IconButton>
         </Box>
-
+        <div style={{ display: 'flex', justifyContent: 'flex-end', padding: 16 }}>
+          <Link to = {"/seller/add-product"}>
+        <AddCircleOutlineIcon
+          style={{ fontSize: 40, color: "#008296", cursor: "pointer" }}
+          titleAccess="Add Product" 
+        />
+        </Link>
+      </div>
         {/* Mail */}
         <IconButton sx={{ color: "#fff", ml: 18 }}>
           <MailOutlineIcon />
@@ -400,42 +356,109 @@ function SellerNavBar() {
     </AppBar>
   );
 }
-
 export default function SellerDashboard() {
-  const theme = useTheme();
+  const [dashboardData, setDashboardData] = useState(null);
+  const [trackRecordData, setTrackRecordData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        
+        // Fetch both data in parallel
+        const [dashboardRes, trackRes] = await Promise.all([
+          getSellerDashboard('seller123'),
+          getSellerTrackRecord('seller123')
+        ]);
+        
+        setDashboardData(dashboardRes.data);
+        setTrackRecordData(trackRes.data);
+      } catch (err) {
+        setError(err.message);
+        console.error('Fetch error:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  if (loading) {
+    return (
+      <Box sx={{ 
+        display: 'flex', 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        height: '100vh',
+        bgcolor: '#f6fafd'
+      }}>
+        <CircularProgress size={60} />
+        <Typography variant="h6" sx={{ ml: 2 }}>Loading seller data...</Typography>
+      </Box>
+    );
+  }
+
+  if (error) {
+    return (
+      <Box sx={{ 
+        display: 'flex', 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        height: '100vh',
+        bgcolor: '#f6fafd',
+        flexDirection: 'column'
+      }}>
+        <Typography variant="h6" color="error">Error: {error}</Typography>
+        <Button 
+          variant="contained" 
+          sx={{ mt: 2 }}
+          onClick={() => window.location.reload()}
+        >
+          Retry
+        </Button>
+      </Box>
+    );
+  }
+
+  // Check if data exists before rendering
+  if (!dashboardData || !trackRecordData) {
+    return (
+      <Box sx={{ 
+        display: 'flex', 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        height: '100vh',
+        bgcolor: '#f6fafd'
+      }}>
+        <Typography variant="h6">No data available</Typography>
+      </Box>
+    );
+  }
 
   return (
-    <Box
-      sx={{
-        bgcolor: "#f6fafd",
-        minHeight: "100vh",
-        fontFamily: "Amazon Ember, Arial, sans-serif",
-      }}
-    >
-      {/* Top Nav */}
+    <Box sx={{ bgcolor: "#f6fafd", minHeight: "100vh" }}>
       <SellerNavBar />
 
       {/* KPIs */}
       <Grid container spacing={2} sx={{ mt: 2, px: 2 }}>
-        {kpis.map((kpi, i) => (
+        {dashboardData.kpis.map((kpi, i) => (
           <Grid item xs={6} sm={3} md={1.5} key={i}>
-            <Card
-              sx={{
-                p: 2,
-                minHeight: 75,
-                bgcolor: "#fff",
-                boxShadow: "0 1px 4px 0 rgba(0,0,0,0.04)",
-                borderRadius: 2,
-                border: "1px solid #f0f0f0",
-              }}
-            >
-              <Typography
-                variant="body2"
-                sx={{ color: "#888", fontWeight: 600 }}
-              >
+            <Card sx={{ 
+              p: 2, 
+              minHeight: 75, 
+              bgcolor: "#fff", 
+              boxShadow: "0 1px 4px 0 rgba(0,0,0,0.04)",
+              borderRadius: 2,
+              border: "1px solid #f0f0f0"
+            }}>
+              <Typography variant="body2" sx={{ color: "#888", fontWeight: 600 }}>
                 {kpi.label}
               </Typography>
-              <Typography variant="h6" sx={{ fontWeight: 700,color: "#72bcd4" }}>
+              <Typography variant="h6" sx={{ fontWeight: 700, color: "#72bcd4" }}>
                 {kpi.value}
               </Typography>
             </Card>
@@ -446,20 +469,18 @@ export default function SellerDashboard() {
       {/* Custom Stats & Graph */}
       <Grid container spacing={2} sx={{ mt: 2, px: 2 }}>
         <Grid item xs={12} md={8}>
-          <Card
-            sx={{
-              p: 3,
-              borderRadius: 2,
-              boxShadow: "0 1px 4px 0 rgba(0,0,0,0.04)",
-            }}
-          >
+          <Card sx={{ 
+            p: 3, 
+            borderRadius: 2, 
+            boxShadow: "0 1px 4px 0 rgba(0,0,0,0.04)" 
+          }}>
             <Typography variant="h6" sx={{ mb: 2, fontWeight: 700 }}>
               Seller Track Record
             </Typography>
             <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={graphData}>
+              <LineChart data={trackRecordData.graphData}>
                 <CartesianGrid stroke="#f0f0f0" />
-                <XAxis dataKey="month" tick={{ fontWeight: 600 }} />
+                <XAxis dataKey="month" />
                 <YAxis />
                 <Tooltip />
                 <Legend />
@@ -467,155 +488,139 @@ export default function SellerDashboard() {
                   type="monotone"
                   dataKey="StockUnavailable"
                   stroke="#f44336"
-                  strokeWidth={3}
+                  strokeWidth={2}
                   name="Stock Unavailable"
-                  dot={{ r: 6 }}
+                  dot={{ r: 4 }}
                 />
                 <Line
                   type="monotone"
                   dataKey="Fraud"
                   stroke="#ff9800"
-                  strokeWidth={3}
+                  strokeWidth={2}
                   name="Fraud Detected"
-                  dot={{ r: 6 }}
+                  dot={{ r: 4 }}
                 />
                 <Line
                   type="monotone"
                   dataKey="GoodReviews"
                   stroke="#4caf50"
-                  strokeWidth={3}
+                  strokeWidth={2}
                   name="Good Reviews"
-                  dot={{ r: 6 }}
+                  dot={{ r: 4 }}
                 />
               </LineChart>
             </ResponsiveContainer>
             <Grid container spacing={2} sx={{ mt: 2 }}>
               <Grid item xs={12} sm={4}>
-                <Card
-                  sx={{
-                    p: 2,
-                    bgcolor: "#fffbe6",
-                    borderLeft: "5px solid #FFD814",
-                    boxShadow: "none",
-                  }}
-                >
-                  <Typography
-                    variant="body2"
-                    sx={{ color: "#888", fontWeight: 600 }}
-                  >
-                    Stock Unavailable (last 5 months)
+                <Card sx={{ 
+                  p: 2, 
+                  bgcolor: "#fffbe6", 
+                  borderLeft: "3px solid #FFD814",
+                  boxShadow: "none" 
+                }}>
+                  <Typography variant="body2" sx={{ color: "#888", fontWeight: 600 }}>
+                    Stock Unavailable
                   </Typography>
                   <Typography variant="h6" sx={{ fontWeight: 700 }}>
-                    7 times
+                    {trackRecordData.stats.stockUnavailable} times
                   </Typography>
                 </Card>
               </Grid>
               <Grid item xs={12} sm={4}>
-                <Card
-                  sx={{
-                    p: 2,
-                    bgcolor: "#fff5f5",
-                    borderLeft: "5px solid #f44336",
-                    boxShadow: "none",
-                  }}
-                >
-                  <Typography
-                    variant="body2"
-                    sx={{ color: "#888", fontWeight: 600 }}
-                  >
-                    Fraud Detected (Aegis Model)
+                <Card sx={{ 
+                  p: 2, 
+                  bgcolor: "#fff5f5", 
+                  borderLeft: "3px solid #f44336",
+                  boxShadow: "none" 
+                }}>
+                  <Typography variant="body2" sx={{ color: "#888", fontWeight: 600 }}>
+                    Fraud Detected
                   </Typography>
                   <Typography variant="h6" sx={{ fontWeight: 700 }}>
-                    4 times
+                    {trackRecordData.stats.fraudDetected} times
                   </Typography>
                 </Card>
               </Grid>
               <Grid item xs={12} sm={4}>
-                <Card
-                  sx={{
-                    p: 2,
-                    bgcolor: "#e8f5e9",
-                    borderLeft: "5px solid #4caf50",
-                    boxShadow: "none",
-                  }}
-                >
-                  <Typography
-                    variant="body2"
-                    sx={{ color: "#888", fontWeight: 600 }}
-                  >
+                <Card sx={{ 
+                  p: 2, 
+                  bgcolor: "#e8f5e9", 
+                  borderLeft: "3px solid #4caf50",
+                  boxShadow: "none" 
+                }}>
+                  <Typography variant="body2" sx={{ color: "#888", fontWeight: 600 }}>
                     Good Reviews
                   </Typography>
                   <Typography variant="h6" sx={{ fontWeight: 700 }}>
-                    39 reviews
+                    {trackRecordData.stats.goodReviews} reviews
                   </Typography>
                 </Card>
               </Grid>
             </Grid>
           </Card>
         </Grid>
+        
         {/* Badge Section */}
         <Grid item xs={12} md={4}>
-          <Card
-            sx={{
-              p: 3,
-              textAlign: "center",
-              minHeight: 250,
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              justifyContent: "center",
-              borderRadius: 2,
-              boxShadow: "0 1px 4px 0 rgba(0,0,0,0.04)",
-            }}
-          >
+          <Card sx={{ 
+            p: 3, 
+            textAlign: "center", 
+            minHeight: 250, 
+            display: "flex", 
+            flexDirection: "column", 
+            alignItems: "center", 
+            justifyContent: "center", 
+            borderRadius: 2,
+            boxShadow: "0 1px 4px 0 rgba(0,0,0,0.04)"
+          }}>
             <Typography variant="h6" sx={{ mb: 2, fontWeight: 700 }}>
               Seller Badge
             </Typography>
-            <Avatar sx={{ bgcolor: "#FFD814", width: 56, height: 56, mb: 1 }}>
-              {badge.icon}
+            <Avatar sx={{ 
+              bgcolor: "#FFD814", 
+              width: 56, 
+              height: 56, 
+              mb: 1 
+            }}>
+              <EmojiEventsIcon sx={{ color: "#fff" }} />
             </Avatar>
             <Chip
-              label={badge.name}
+              label={dashboardData.badge.name}
               color="warning"
               sx={{ fontWeight: 700, mb: 1, fontSize: 16 }}
             />
             <Typography variant="body2" sx={{ color: "#888", fontWeight: 600 }}>
-              {badge.description}
+              {dashboardData.badge.description}
             </Typography>
           </Card>
         </Grid>
       </Grid>
 
       {/* Info/Action Cards */}
-      <Grid container spacing={2} sx={{ mt: 2, px: 2 ,gap:6, mb:2}}>
+      <Grid container spacing={2} sx={{ mt: 2, px: 2, mb: 2 }}>
         {infoCards.map((card, i) => (
-          <Grid item xs={12} sm={6} md={4} lg={2} key={i} >
-            <Card
-              sx={{
-                bgcolor: card.color,
-                borderLeft: `5px solid ${card.border}`,
-                height: 260,
-                minWidth: 250,
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "space-between",
-                p: 2,
-                borderRadius: 2,
-                boxShadow: "0 1px 4px 0 rgba(0,0,0,0.04)",
-              }}
-            >
+          <Grid item xs={12} sm={6} md={4} lg={3} key={i}>
+            <Card sx={{ 
+              bgcolor: card.color, 
+              borderLeft: `4px solid ${card.border}`, 
+              minHeight: 200,
+              display: "flex", 
+              flexDirection: "column", 
+              justifyContent: "space-between", 
+              p: 2, 
+              borderRadius: 2,
+              boxShadow: "0 1px 4px 0 rgba(0,0,0,0.04)"
+            }}>
               <CardContent sx={{ p: 0 }}>
                 <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
                   {card.icon && (
-                    <Avatar
-                      sx={{
-                        bgcolor: "transparent",
-                        width: 28,
-                        height: 28,
-                        mr: 1,
-                        boxShadow: "none",
-                      }}
-                    >
+                    <Avatar sx={{ 
+                      bgcolor: "transparent", 
+                      width: 28, 
+                      height: 28, 
+                      mr: 1,
+                      color: card.border
+                    }}>
                       {card.icon}
                     </Avatar>
                   )}

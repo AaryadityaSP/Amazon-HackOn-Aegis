@@ -11,17 +11,20 @@ import {
   Stack,
   ToggleButton,
   ToggleButtonGroup,
-  IconButton,
 } from "@mui/material";
 import AddAPhotoIcon from "@mui/icons-material/AddAPhoto";
 import MicIcon from "@mui/icons-material/Mic";
 import StopIcon from "@mui/icons-material/Stop";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
-import { uploadData } from "aws-amplify/storage";
-import { post } from "aws-amplify/api";
-import oneplusbannerimage from "../Assets/images/oneplus banner image.jpg";
 import RateReviewIcon from "@mui/icons-material/RateReview";
 import HeadsetIcon from "@mui/icons-material/Headset";
+import oneplusbannerimage from "../Assets/images/oneplus banner image.jpg";
+import {
+  getPresignedUrl,
+  uploadAudioToS3,
+  submitTextReview,
+  submitAudioReview,
+} from "./utils/api";
 
 const productExample = {
   image: `${oneplusbannerimage}`,
@@ -33,8 +36,6 @@ const productExample = {
 const AmazonReviewForm = ({ productId, product = productExample }) => {
   // Toggle: "text" or "audio"
   const [reviewType, setReviewType] = useState("text");
-
-  // Shared
   const [rating, setRating] = useState(0);
   const [photos, setPhotos] = useState([]);
   const [photoPreviews, setPhotoPreviews] = useState([]);
@@ -68,21 +69,13 @@ const AmazonReviewForm = ({ productId, product = productExample }) => {
     for (const file of files) {
       try {
         const fileName = `reviews/${Date.now()}_${file.name}`;
-        await uploadData({
-          path: fileName,
-          data: file,
-          options: {
-            contentType: file.type,
-            accessLevel: "guest",
-          },
-        }).result;
+        // You can use Amplify Storage or your own S3 logic here if needed
         uploadedPhotos.push(fileName);
         previews.push(URL.createObjectURL(file));
         fileNames.push(file.name);
       } catch (err) {
         // Ignore upload error for preview
       }
-      fileNames.push(file.name);
     }
     setPhotos([...photos, ...uploadedPhotos]);
     setPhotoPreviews([...photoPreviews, ...previews]);
@@ -129,35 +122,49 @@ const AmazonReviewForm = ({ productId, product = productExample }) => {
     setIsSubmitting(true);
 
     try {
-      let reviewData = {
-        productId,
+      // Prepare common data
+      const reviewData = {
+        user_id: "Abhishek", // Replace with actual logged-in user id
+        productId: "oneplus13",
         rating,
         photos,
-        reviewType,
       };
 
       if (reviewType === "text") {
-        if (rating === 0 || !title.trim() || !content.trim())
-          return setIsSubmitting(false);
-        reviewData = { ...reviewData, title, content };
+        if (rating === 0 || !title.trim() || !content.trim()) {
+          setIsSubmitting(false);
+          return;
+        }
+        let isBuyer = true;
+        await submitTextReview({
+          ...reviewData,
+          title,
+          content,
+          isBuyer,
+        });
+      } else if (reviewType === "audio") {
+        if (rating === 0 || !audioBlob) {
+          setIsSubmitting(false);
+          return;
+        }
+        // 1. Get presigned URL
+        const { upload_url, audio_key } = await getPresignedUrl(
+          reviewData.user_id,
+          audioFileName || `reviews/audio_${Date.now()}.webm`
+        );
+        console.log(upload_url);
+        // 2. Upload audio to S3
+        const audiofile = 
+        await uploadAudioToS3(upload_url, audioBlob);
+        // 3. Submit review
+        await submitAudioReview({
+          ...reviewData,
+          audio_key,
+        });
+        <Typography color="success.main" fontWeight={600}>
+                Review submitted successfully!
+              </Typography>
       }
-      if (reviewType === "audio") {
-        if (rating === 0 || !audioBlob) return setIsSubmitting(false);
-        // Upload audio to S3
-        const fileName = audioFileName || `reviews/audio_${Date.now()}.webm`;
-        await uploadData({
-          path: fileName,
-          data: audioBlob,
-          options: { contentType: "audio/webm", accessLevel: "guest" },
-        }).result;
-        reviewData = { ...reviewData, audio: fileName };
-      }
-
-      await post({
-        apiName: "reviewsApi",
-        path: "/reviews",
-        options: { body: reviewData },
-      });
 
       setSuccess(true);
       setRating(0);
@@ -337,7 +344,6 @@ const AmazonReviewForm = ({ productId, product = productExample }) => {
                 </Stack>
               )}
             </Stack>
-            {/* --- THE ONLY CHANGE: file names box --- */}
             {photoFileNames.length > 0 && (
               <Box
                 sx={{
@@ -384,11 +390,9 @@ const AmazonReviewForm = ({ productId, product = productExample }) => {
               </Box>
             )}
           </Box>
-
           {/* Text Review Form */}
           {reviewType === "text" && (
             <>
-              {/* Headline */}
               <Box sx={{ mb: 3 }}>
                 <Typography variant="body1" fontWeight={500} sx={{ mb: 1 }}>
                   Add a headline
@@ -403,7 +407,6 @@ const AmazonReviewForm = ({ productId, product = productExample }) => {
                   inputProps={{ maxLength: 100 }}
                 />
               </Box>
-              {/* Written Review */}
               <Box sx={{ mb: 3 }}>
                 <Typography variant="body1" fontWeight={500} sx={{ mb: 1 }}>
                   Write your review
@@ -481,8 +484,6 @@ const AmazonReviewForm = ({ productId, product = productExample }) => {
               )}
             </Box>
           )}
-
-          {/* Submit */}
           <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
             <Button
               type="submit"

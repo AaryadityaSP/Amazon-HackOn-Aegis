@@ -33,11 +33,7 @@ import SellerDashboard from "./Components/SellerDashboard";
 import CustomerDashboard from "./Components/CustomerDashboard";
 import ProductPageAfterSearch from "./Components/ProductPageAfterSearch";
 import AmazonReviewForm from "./Components/AmazonReviewForm";
-// import { Amplify } from 'aws-amplify';
-// import awsconfig from './aws-exports'; // or your config file
-
-// Amplify.configure(awsconfig);
-
+import SellerAddProduct from "./Components/SellerAddProduct";
 const cartFromLocalStorage = JSON.parse(
   localStorage.getItem("cart") || '{"items":[],"count":0}'
 );
@@ -187,16 +183,6 @@ function App() {
             }
           />
           <Route
-            path="/reviewform"
-            element={
-              <>
-                <NavBar />
-                <AmazonReviewForm />
-                <Footer />
-              </>
-            }
-          />
-          <Route
             path="/sellerdashboard"
             element={
               <>
@@ -204,6 +190,7 @@ function App() {
               </>
             }
           />
+          <Route path="/seller/add-product" element={<SellerAddProduct />} />
           <Route
             path="/customerdashboard"
             element={
@@ -225,7 +212,7 @@ function App() {
             }
           />
           <Route
-            path="/products/:id"
+            path="/oneplus13/:id"
             exact
             element={
               <>
@@ -242,6 +229,16 @@ function App() {
                 <NavBar />
                 <ProductPageAfterSearch />
                 <Footer />
+              </>
+            }
+          />
+           <Route
+            path="/reviewform"
+            element={
+              <>
+              <NavBar />
+              <AmazonReviewForm />  
+              <Footer />
               </>
             }
           />

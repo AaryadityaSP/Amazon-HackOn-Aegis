@@ -1,0 +1,34 @@
+service: amazon-backend
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  region: ap-south-1
+  environment:
+    NODE_ENV: production
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+      Resource:
+        - "arn:aws:dynamodb:ap-south-1:*:table/Customers"
+        - "arn:aws:dynamodb:ap-south-1:*:table/Sellers"
+        - "arn:aws:dynamodb:ap-south-1:*:table/CustomerAnalytics"
+        - "arn:aws:dynamodb:ap-south-1:*:table/SellerAnalytics"
+
+functions:
+  app:
+    handler: src/app.handler
+    events:
+      - http:
+          path: /{proxy+}
+          method: ANY
+          cors: true
+
+plugins:
+  - serverless-offline

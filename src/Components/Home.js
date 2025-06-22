@@ -54,28 +54,28 @@ function BannerCarousel() {
         navButtonsAlwaysVisible
         interval={4000}
         animation="fade"
-        indicators={true}
-        indicatorIconButtonProps={{
-          style: {
-            padding: "8px",
-            color: "#fff",
-          },
-        }}
-        activeIndicatorIconButtonProps={{
-          style: {
-            color: "#f90",
-          },
-        }}
-        indicatorContainerProps={{
-          style: {
-            position: "absolute",
-            bottom: 10,
-            left: 0,
-            right: 0,
-            textAlign: "center",
-            zIndex: 3,
-          },
-        }}
+        // indicators={true}
+        // indicatorIconButtonProps={{
+        //   style: {
+        //     padding: "8px",
+        //     color: "#fff",
+        //   },
+        // }}
+        // activeIndicatorIconButtonProps={{
+        //   style: {
+        //     color: "#f90",
+        //   },
+        // }}
+        // indicatorContainerProps={{
+        //   style: {
+        //     position: "absolute",
+        //     bottom: 10,
+        //     left: 0,
+        //     right: 0,
+        //     textAlign: "center",
+        //     zIndex: 3,
+        //   },
+        // }}
         NavButton={({ onClick, className, style, next, prev }) => (
           <IconButton
             onClick={onClick}
@@ -247,7 +247,7 @@ function Home() {
         <Grid container spacing={3} sx={{ mt: -5, px: 2 }}>
           {Object.keys(data).map((i) => (
             <Grid item xs={12} sm={6} md={4} lg={3} xl={3} key={i}>
-              <Link
+              {/* <Link
                 to={`/products/${data[i].id}`}
                 style={{
                   display: "flex",
@@ -258,9 +258,9 @@ function Home() {
                   width: "100%",
                   height: "100%",
                 }}
-              >
+              > */}
                 <ProductCard item={data[i]} />
-              </Link>
+              {/* </Link> */}
             </Grid>
           ))}
         </Grid>

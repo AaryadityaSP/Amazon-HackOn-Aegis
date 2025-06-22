@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   Box,
   AppBar,
@@ -93,9 +93,7 @@ const graphData = [
     FraudReturns: 0,
   },
 ];
-
-// Trust Score Logic Example
-const trustScore = 89; // Calculate this in backend
+const trustScore = 89; 
 const trustBadge =
   trustScore >= 85
     ? {
@@ -294,7 +292,39 @@ function CustomerNavBar() {
 
 export default function CustomerDashboard() {
   const theme = useTheme();
+  const [dashboardData, setDashboardData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch('http://localhost:5000/api/customer/user123/dashboard');
+        if (!response.ok) throw new Error('API request failed');
+        const data = await response.json();
+        setDashboardData(data);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  if (loading) return <div>Loading dashboard...</div>;
+  if (error) return <div>Error: {error}</div>;
+
+  // Extract data from API response
+  const { kpis, trustScore, graphData } = dashboardData;
+
+  // Trust badge calculation (using API data)
+  const trustBadge = trustScore >= 85
+    ? { label: "Trusted Customer", color: "success", icon: <EmojiEventsIcon sx={{ color: "#4caf50" }} /> }
+    : trustScore >= 60
+    ? { label: "Regular Customer", color: "warning", icon: <EmojiEventsIcon sx={{ color: "#FFD700" }} /> }
+    : { label: "Needs Improvement", color: "error", icon: <EmojiEventsIcon sx={{ color: "#f44336" }} /> };
   return (
     <Box
       sx={{
