@@ -558,11 +558,11 @@ function ProductDescription() {
   const handleCollaborate = async (reviewIdx, review) => {
     setCollabStatus((prev) => ({ ...prev, [reviewIdx]: "loading" }));
     try {
-      const currentUserId = "customer123"; // Replace with actual logged-in user id if available
+      const currentUserId = "Addy"; // Replace with actual logged-in user id if available
 
       // Use your own logic to get these IDs
       const user_id = currentUserId; // logged-in user
-      const collaborator_id = review.user_id || review.name; // review's author (adjust as per your backend)
+      const collaborator_id = "1122"; // review's author (adjust as per your backend)
       // const product_id = product.id;
       const product_id = "oneplus13";
 
