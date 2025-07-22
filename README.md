@@ -75,7 +75,7 @@
   
   
   <!-- GETTING STARTED -->
-  
+  <!--
   ## Getting Started
   To run the project, you will have to go through the following steps
   ### Prerequisites
