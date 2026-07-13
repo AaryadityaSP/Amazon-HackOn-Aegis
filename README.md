@@ -145,8 +145,8 @@
   <!-- CONTACT -->
   ## Contact
   
-  Aaryaditya Singh Panwar- [@aaryadityasinghpanwar](https://instagram.com/aaryadityasinghpanwar)
-  Project Link: [https://github.com/your_username/Aegis](https://github.com/AaryadityaSP/Amazon-HackOn-Aegis)
+  Aaryaditya Singh Panwar- [@aaryadityasinghpanwar](https://www.linkedin.com/in/aaryaditya-singh-panwar-b13bba252)
+  Project Link: [https://github.com/AaryadityaSP/Aegis](https://github.com/AaryadityaSP/Amazon-HackOn-Aegis)
   
   <p align="right">(<a href="#readme-top">back to top</a>)</p>
   
