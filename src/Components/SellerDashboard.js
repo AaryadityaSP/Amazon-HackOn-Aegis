@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 import {
   Box,
   AppBar,
@@ -39,6 +40,8 @@ import amazonLogo from "../Assets/images/seller-central_logo-white.svg";
 import BookmarkBorderIcon from "@mui/icons-material/BookmarkBorder";
 import { useNavigate } from "react-router-dom";
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
+import { io } from "socket.io-client";
+
 // Static data for info cards
 // Info/Action Cards
 const infoCards = [
@@ -361,6 +364,7 @@ export default function SellerDashboard() {
   const [trackRecordData, setTrackRecordData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const role = useSelector((state) => state.user.role);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -370,8 +374,8 @@ export default function SellerDashboard() {
         
         // Fetch both data in parallel
         const [dashboardRes, trackRes] = await Promise.all([
-          getSellerDashboard('seller123'),
-          getSellerTrackRecord('seller123')
+          getSellerDashboard('demo-seller-001'),
+          getSellerTrackRecord('demo-seller-001')
         ]);
         
         setDashboardData(dashboardRes.data);
@@ -385,7 +389,36 @@ export default function SellerDashboard() {
     };
 
     fetchData();
+
+    // Socket.io real-time connection
+    const socket = io("http://localhost:5000", {
+      withCredentials: true,
+    });
+
+    socket.on("connect", () => {
+      console.log("Socket connected:", socket.id);
+      socket.emit("join-room", "dashboard-seller-seller123");
+      socket.emit("join-room", "dashboard-seller");
+    });
+
+    socket.on("LISTING_FLAGGED", (data) => {
+      console.log("Real-time event received (LISTING_FLAGGED):", data);
+      fetchData(); // Refetch data
+    });
+
+    socket.on("SCORE_UPDATED", (data) => {
+      console.log("Real-time event received (SCORE_UPDATED):", data);
+      fetchData(); // Refetch data
+    });
+
+    return () => {
+      socket.disconnect();
+    };
   }, []);
+
+  if (role !== "seller" && role !== "tester") {
+    return <Navigate to="/" replace />;
+  }
 
   if (loading) {
     return (

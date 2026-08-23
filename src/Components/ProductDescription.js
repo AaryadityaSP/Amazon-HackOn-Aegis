@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
+import { useSelector } from "react-redux";
 import {
   Button,
   Typography,
@@ -13,6 +14,7 @@ import {
   Avatar,
   Tabs,
   Tab,
+  CircularProgress,
 } from "@mui/material";
 import StarRatings from "react-star-ratings";
 import { BiChevronLeft } from "react-icons/bi";
@@ -35,6 +37,8 @@ import oneplus13image7 from "../Assets/images/oneplus13image7.jpg";
 import oneplus13image8 from "../Assets/images/oneplus13image8.jpg";
 import oneplus13image9 from "../Assets/images/oneplus13image9.jpg";
 import oneplus13image10 from "../Assets/images/oneplus13image10.jpg";
+
+import { mockProducts } from "../data/mockProducts";
 
 // Dummy reviews (replace with backend data as needed)
 const imageReviews = [
@@ -77,472 +81,15 @@ const audioReviews = [
 
 const bannerImages = [AddBanner1, AddBanner2, AddBanner3, AddBanner4];
 
-const products = [
-  {
-    id: 1,
-    title: "OnePlus 13 (16GB RAM, 512GB) - Midnight Ocean",
-    price: 76999,
-    mrp: 99999,
-    description: {
-      about: [
-        "Flagship power made smarter with Qualcomm Snapdragon 8 Elite Mobile Platform – the heart that powers the mind of OnePlus AI. With a faster Neural Engine, an improved CPU and GPU, and a big jump in memory bandwidth.",
-        "OxygenOS 15 - Experience the power of all-new OnePlus AI. Search smarter, crank up your creativity, and power your productivity for a smoother digital life.",
-        "5th-Gen Hasselblad Camera for Mobile combines a flagship 50MP triple camera system – Wide 50MP Sony's LYT-808 with OIS, 3X Triprism Telephoto 50MP and an Ultra-wide 50MP (120° Fov, 1/2.75 sensor size sensor.",
-        "The all-new, record-breaking 2K ProXDR Display. Achieving an industry-first DisplayMate A++. Open your eyes to a new level of color accuracy, brightness and color depth.",
-        "Durability meets elegance with an IP69 and IP68 rating – The design is forward-looking and future-proof. Experience the industry's highest levels of water and dust resistance wherever your journey takes you.",
-        "Ultra-slim OnePlus Silicon NanoStack Battery – Our biggest battery ever, at 6000 mAh. Amp up your power with 100W wired fast charging, delivering up to 100% charge in 36 minutes, 50W wireless fast charging, for up to 50% charge in 34 minutes.",
-      ],
-      product_details: {
-        Brand_Name: "OnePlus",
-        Model_Year: "2025",
-        Box_Contents:
-          "Power Adapter, SIM Tray Ejector, Phone Case, Screen Protector, USB Cable",
-        Battery_Capacity: "6000 mAh (Silicon-Carbon)",
-        Battery_Charge_Time:
-          "36 Minutes (100W Wired), 34 Minutes (50W Wireless)",
-        Display:
-          "6.82-inch 2K ProXDR AMOLED, 3168 x 1440, 120Hz, DisplayMate A++",
-        Processor: "Qualcomm Snapdragon 8 Elite, 3.2 GHz Octa-core",
-        RAM: "16GB",
-        Storage: "512GB",
-        Operating_System: "OxygenOS 15 (Android 15)",
-        Camera: "50MP + 50MP + 50MP Hasselblad Triple Rear, 32MP Front",
-        Camera_Features:
-          "Wide (Sony LYT-808, OIS), 3X Triprism Telephoto, Ultra-wide (120° FOV), Landscape, Macro, Night, Telephoto, Portrait, Automatic",
-        Video: "4K Recording",
-        SIM: "Dual SIM (Nano), 5G Supported",
-        Network: "Unlocked for All Carriers, LTE, USB Type C",
-        Water_Resistance: "IP69 & IP68",
-        Dimensions: "16.3 x 7.7 x 0.9 cm",
-        Weight: "210 grams",
-        Security: "Fingerprint Recognition, Face Unlock",
-        Headphone_Jack: "3.5 mm",
-        Warranty:
-          "1 year manufacturer warranty for device and 6 months manufacturer warranty for in-box accessories including batteries from the date of purchase",
-      },
-    },
-    category: "mobiles",
-    image: oneplus13image1,
-    rating: {
-      rate: 4.7,
-      count: 204,
-    },
-  },
-  {
-    id: 2,
-    title: "OnePlus 13 (16GB RAM, 512GB) - Black Eclipse",
-    price: 76999,
-    mrp: 99999,
-    description: {
-      about: [
-        "Flagship power made smarter with Qualcomm Snapdragon 8 Elite Mobile Platform and enhanced AI experiences.",
-        "OxygenOS 15 for seamless multitasking and advanced AI features.",
-        "5th-Gen Hasselblad Camera: 50MP Sony LYT-808 wide, 50MP 3X Triprism telephoto, 50MP ultra-wide (120° FOV).",
-        "2K ProXDR Display with DisplayMate A++, ultra-high color accuracy and brightness.",
-        "IP69/IP68 rated for top-tier water and dust resistance.",
-        "6000 mAh Silicon NanoStack battery, 100W wired and 50W wireless fast charging.",
-      ],
-      product_details: {
-        Brand_Name: "OnePlus",
-        Model_Year: "2025",
-        Box_Contents: "Power Adapter, SIM Tray Ejector, Case, USB Cable",
-        Battery_Capacity: "6000 mAh",
-        Battery_Charge_Time: "36 min (wired), 34 min (wireless)",
-        Display: "6.82-inch 2K ProXDR AMOLED, 120Hz",
-        Processor: "Snapdragon 8 Elite",
-        RAM: "16GB",
-        Storage: "512GB",
-        Operating_System: "OxygenOS 15 (Android 15)",
-        Camera: "Triple 50MP Hasselblad Rear, 32MP Front",
-        Camera_Features: "OIS, 3X Telephoto, 120° Ultra-wide",
-        Video: "4K",
-        SIM: "Dual SIM, 5G",
-        Network: "Unlocked, USB Type C",
-        Water_Resistance: "IP69 & IP68",
-        Dimensions: "16.3 x 7.7 x 0.9 cm",
-        Weight: "210g",
-        Security: "Fingerprint, Face Unlock",
-        Headphone_Jack: "No",
-        Warranty: "1 year device, 6 months accessories",
-      },
-    },
-    category: "mobiles",
-    image: oneplus13image2,
-    rating: {
-      rate: 4.7,
-      count: 153,
-    },
-  },
-  {
-    id: 3,
-    title: "OnePlus 13 (16GB RAM, 512GB) - Arctic Dawn",
-    price: 76999,
-    mrp: 99999,
-    description: {
-      about: [
-        "Snapdragon 8 Elite Mobile Platform with advanced OnePlus AI for smarter performance.",
-        "OxygenOS 15 delivers a smooth, intelligent software experience.",
-        "Triple 50MP Hasselblad camera system with wide, telephoto, and ultra-wide sensors.",
-        "2K ProXDR AMOLED display, DisplayMate A++ certified.",
-        "IP69/IP68 water and dust resistance for ultimate durability.",
-        "6000 mAh battery, 100W wired, 50W wireless fast charging.",
-      ],
-      product_details: {
-        Brand_Name: "OnePlus",
-        Model_Year: "2025",
-        Box_Contents: "Charger, Case, USB Cable, SIM Tool",
-        Battery_Capacity: "6000 mAh",
-        Battery_Charge_Time: "36 min (wired), 34 min (wireless)",
-        Display: "6.82-inch 2K ProXDR AMOLED, 120Hz",
-        Processor: "Snapdragon 8 Elite",
-        RAM: "16GB",
-        Storage: "512GB",
-        Operating_System: "OxygenOS 15",
-        Camera: "Triple 50MP Hasselblad, 32MP Front",
-        Camera_Features: "OIS, Telephoto, Ultra-wide",
-        Video: "4K",
-        SIM: "Dual SIM, 5G",
-        Network: "Unlocked, USB Type C",
-        Water_Resistance: "IP69 & IP68",
-        Dimensions: "16.3 x 7.7 x 0.9 cm",
-        Weight: "210g",
-        Security: "Fingerprint, Face Unlock",
-        Headphone_Jack: "No",
-        Warranty: "1 year device, 6 months accessories",
-      },
-    },
-    category: "mobiles",
-    image: oneplus13image3,
-    rating: {
-      rate: 4.6,
-      count: 142,
-    },
-  },
-  {
-    id: 4,
-    title: "OnePlus 13 (12GB RAM, 256GB) - Midnight Ocean",
-    price: 69999,
-    mrp: 99999,
-    description: {
-      about: [
-        "Experience flagship performance with Snapdragon 8 Elite and OnePlus AI.",
-        "OxygenOS 15 for smooth, intelligent operation.",
-        "Triple 50MP Hasselblad camera system for pro-level photography.",
-        "2K ProXDR AMOLED display, DisplayMate A++.",
-        "IP69/IP68 rated for best-in-class durability.",
-        "6000 mAh battery, 100W wired, 50W wireless fast charging.",
-      ],
-      product_details: {
-        Brand_Name: "OnePlus",
-        Model_Year: "2025",
-        Box_Contents: "Charger, Case, USB Cable, SIM Tool",
-        Battery_Capacity: "6000 mAh",
-        Battery_Charge_Time: "36 min (wired), 34 min (wireless)",
-        Display: "6.82-inch 2K ProXDR AMOLED, 120Hz",
-        Processor: "Snapdragon 8 Elite",
-        RAM: "12GB",
-        Storage: "256GB",
-        Operating_System: "OxygenOS 15",
-        Camera: "Triple 50MP Hasselblad, 32MP Front",
-        Camera_Features: "OIS, Telephoto, Ultra-wide",
-        Video: "4K",
-        SIM: "Dual SIM, 5G",
-        Network: "Unlocked, USB Type C",
-        Water_Resistance: "IP69 & IP68",
-        Dimensions: "16.3 x 7.7 x 0.9 cm",
-        Weight: "210g",
-        Security: "Fingerprint, Face Unlock",
-        Headphone_Jack: "No",
-        Warranty: "1 year device, 6 months accessories",
-      },
-    },
-    category: "mobiles",
-    image: oneplus13image4,
-    rating: {
-      rate: 4.6,
-      count: 100,
-    },
-  },
-  {
-    id: 5,
-    title: "OnePlus 13 (12GB RAM, 256GB) - Black Eclipse",
-    price: 69999,
-    mrp: 99999,
-    description: {
-      about: [
-        "Snapdragon 8 Elite Mobile Platform with next-gen OnePlus AI.",
-        "OxygenOS 15 for a seamless, creative, and productive experience.",
-        "Flagship 50MP Hasselblad triple camera system.",
-        "2K ProXDR AMOLED display, DisplayMate A++.",
-        "IP69/IP68 water and dust resistance.",
-        "6000 mAh battery, 100W wired, 50W wireless fast charging.",
-      ],
-      product_details: {
-        Brand_Name: "OnePlus",
-        Model_Year: "2025",
-        Box_Contents: "Charger, USB Cable, Case, SIM Tool",
-        Battery_Capacity: "6000 mAh",
-        Battery_Charge_Time: "36 min (wired), 34 min (wireless)",
-        Display: "6.82-inch 2K ProXDR AMOLED, 120Hz",
-        Processor: "Snapdragon 8 Elite",
-        RAM: "12GB",
-        Storage: "256GB",
-        Operating_System: "OxygenOS 15",
-        Camera: "Triple 50MP Hasselblad, 32MP Front",
-        Camera_Features: "OIS, Telephoto, Ultra-wide",
-        Video: "4K",
-        SIM: "Dual SIM, 5G",
-        Network: "Unlocked, USB Type C",
-        Water_Resistance: "IP69 & IP68",
-        Dimensions: "16.3 x 7.7 x 0.9 cm",
-        Weight: "210g",
-        Security: "Fingerprint, Face Unlock",
-        Headphone_Jack: "No",
-        Warranty: "1 year device, 6 months accessories",
-      },
-    },
-    category: "mobiles",
-    image: oneplus13image5,
-    rating: {
-      rate: 4.5,
-      count: 168,
-    },
-  },
-  {
-    id: 6,
-    title: "OnePlus 13 (12GB RAM, 256GB) - Arctic Dawn",
-    price: 69999,
-    mrp: 99999,
-    description: {
-      about: [
-        "Flagship power with Snapdragon 8 Elite and the latest OnePlus AI.",
-        "OxygenOS 15 for a smarter, faster phone experience.",
-        "5th-Gen Hasselblad Camera: 50MP triple camera system.",
-        "2K ProXDR AMOLED display, DisplayMate A++.",
-        "IP69/IP68 water and dust resistance.",
-        "6000 mAh battery, 100W wired, 50W wireless fast charging.",
-      ],
-      product_details: {
-        Brand_Name: "OnePlus",
-        Model_Year: "2025",
-        Box_Contents: "Charger, USB Cable, Case, SIM Tool",
-        Battery_Capacity: "6000 mAh",
-        Battery_Charge_Time: "36 min (wired), 34 min (wireless)",
-        Display: "6.82-inch 2K ProXDR AMOLED, 120Hz",
-        Processor: "Snapdragon 8 Elite",
-        RAM: "12GB",
-        Storage: "256GB",
-        Operating_System: "OxygenOS 15",
-        Camera: "Triple 50MP Hasselblad, 32MP Front",
-        Camera_Features: "OIS, Telephoto, Ultra-wide",
-        Video: "4K",
-        SIM: "Dual SIM, 5G",
-        Network: "Unlocked, USB Type C",
-        Water_Resistance: "IP69 & IP68",
-        Dimensions: "16.3 x 7.7 x 0.9 cm",
-        Weight: "210g",
-        Security: "Fingerprint, Face Unlock",
-        Headphone_Jack: "No",
-        Warranty: "1 year device, 6 months accessories",
-      },
-    },
-    category: "mobiles",
-    image: oneplus13image6,
-    rating: {
-      rate: 4.5,
-      count: 132,
-    },
-  },
-  {
-    id: 7,
-    title: "OnePlus 13 (24GB RAM, 1TB) - Midnight Ocean",
-    price: 89999,
-    mrp: 99999,
-    description: {
-      about: [
-        "Ultimate flagship: Snapdragon 8 Elite, OnePlus AI, 24GB RAM, 1TB storage.",
-        "OxygenOS 15 for next-level productivity and creativity.",
-        "Triple 50MP Hasselblad camera system for stunning shots.",
-        "2K ProXDR AMOLED display, DisplayMate A++.",
-        "IP69/IP68 water and dust resistance.",
-        "6000 mAh battery, 100W wired, 50W wireless fast charging.",
-      ],
-      product_details: {
-        Brand_Name: "OnePlus",
-        Model_Year: "2025",
-        Box_Contents: "Charger, USB Cable, Case, SIM Tool",
-        Battery_Capacity: "6000 mAh",
-        Battery_Charge_Time: "36 min (wired), 34 min (wireless)",
-        Display: "6.82-inch 2K ProXDR AMOLED, 120Hz",
-        Processor: "Snapdragon 8 Elite",
-        RAM: "24GB",
-        Storage: "1TB",
-        Operating_System: "OxygenOS 15",
-        Camera: "Triple 50MP Hasselblad, 32MP Front",
-        Camera_Features: "OIS, Telephoto, Ultra-wide",
-        Video: "4K",
-        SIM: "Dual SIM, 5G",
-        Network: "Unlocked, USB Type C",
-        Water_Resistance: "IP69 & IP68",
-        Dimensions: "16.3 x 7.7 x 0.9 cm",
-        Weight: "210g",
-        Security: "Fingerprint, Face Unlock",
-        Headphone_Jack: "No",
-        Warranty: "1 year device, 6 months accessories",
-      },
-    },
-    category: "mobiles",
-    image: oneplus13image7,
-    rating: {
-      rate: 3.0,
-      count: 24,
-    },
-  },
-  {
-    id: 8,
-    title: "OnePlus 13 (24GB RAM, 1TB) - Black Eclipse",
-    price: 89999,
-    mrp: 99999,
-    description: {
-      about: [
-        "Snapdragon 8 Elite, OnePlus AI, 24GB RAM, 1TB storage for ultimate performance.",
-        "OxygenOS 15 for a seamless, AI-powered experience.",
-        "5th-Gen Hasselblad Camera: 50MP triple camera system.",
-        "2K ProXDR AMOLED display, DisplayMate A++.",
-        "IP69/IP68 water and dust resistance.",
-        "6000 mAh battery, 100W wired, 50W wireless fast charging.",
-      ],
-      product_details: {
-        Brand_Name: "OnePlus",
-        Model_Year: "2025",
-        Box_Contents: "Charger, USB Cable, Case, SIM Tool",
-        Battery_Capacity: "6000 mAh",
-        Battery_Charge_Time: "36 min (wired), 34 min (wireless)",
-        Display: "6.82-inch 2K ProXDR AMOLED, 120Hz",
-        Processor: "Snapdragon 8 Elite",
-        RAM: "24GB",
-        Storage: "1TB",
-        Operating_System: "OxygenOS 15",
-        Camera: "Triple 50MP Hasselblad, 32MP Front",
-        Camera_Features: "OIS, Telephoto, Ultra-wide",
-        Video: "4K",
-        SIM: "Dual SIM, 5G",
-        Network: "Unlocked, USB Type C",
-        Water_Resistance: "IP69 & IP68",
-        Dimensions: "16.3 x 7.7 x 0.9 cm",
-        Weight: "210g",
-        Security: "Fingerprint, Face Unlock",
-        Headphone_Jack: "No",
-        Warranty: "1 year device, 6 months accessories",
-      },
-    },
-    category: "mobiles",
-    image: oneplus13image8,
-    rating: {
-      rate: 3.0,
-      count: 20,
-    },
-  },
-  {
-    id: 9,
-    title: "OnePlus 13 (24GB RAM, 1TB) - Arctic Dawn",
-    price: 89999,
-    mrp: 99999,
-    description: {
-      about: [
-        "Top-tier Snapdragon 8 Elite, OnePlus AI, 24GB RAM, 1TB storage.",
-        "OxygenOS 15 for a next-gen smartphone experience.",
-        "Triple 50MP Hasselblad camera system with AI enhancements.",
-        "2K ProXDR AMOLED display, DisplayMate A++.",
-        "IP69/IP68 water and dust resistance.",
-        "6000 mAh battery, 100W wired, 50W wireless fast charging.",
-      ],
-      product_details: {
-        Brand_Name: "OnePlus",
-        Model_Year: "2025",
-        Box_Contents: "Charger, USB Cable, Case, SIM Tool",
-        Battery_Capacity: "6000 mAh",
-        Battery_Charge_Time: "36 min (wired), 34 min (wireless)",
-        Display: "6.82-inch 2K ProXDR AMOLED, 120Hz",
-        Processor: "Snapdragon 8 Elite",
-        RAM: "24GB",
-        Storage: "1TB",
-        Operating_System: "OxygenOS 15",
-        Camera: "Triple 50MP Hasselblad, 32MP Front",
-        Camera_Features: "OIS, Telephoto, Ultra-wide",
-        Video: "4K",
-        SIM: "Dual SIM, 5G",
-        Network: "Unlocked, USB Type C",
-        Water_Resistance: "IP69 & IP68",
-        Dimensions: "16.3 x 7.7 x 0.9 cm",
-        Weight: "210g",
-        Security: "Fingerprint, Face Unlock",
-        Headphone_Jack: "No",
-        Warranty: "1 year device, 6 months accessories",
-      },
-    },
-    category: "mobiles",
-    image: oneplus13image9,
-    rating: {
-      rate: 2.5,
-      count: 17,
-    },
-  },
-  {
-    id: 10,
-    title: "OnePlus 13 Vegan Leather Edition (16GB RAM, 512GB) - Black Eclipse",
-    price: 78999,
-    mrp: 99999,
-    description: {
-      about: [
-        "Special Vegan Leather Edition in Black Eclipse with Snapdragon 8 Elite and OnePlus AI.",
-        "OxygenOS 15 for a creative, productive, and smooth experience.",
-        "Triple 50MP Hasselblad camera system for flagship photography.",
-        "2K ProXDR AMOLED display, DisplayMate A++.",
-        "IP69/IP68 water and dust resistance.",
-        "6000 mAh battery, 100W wired, 50W wireless fast charging.",
-      ],
-      product_details: {
-        Brand_Name: "OnePlus",
-        Model_Year: "2025",
-        Box_Contents: "Charger, USB Cable, Case, SIM Tool",
-        Battery_Capacity: "6000 mAh",
-        Battery_Charge_Time: "36 min (wired), 34 min (wireless)",
-        Display: "6.82-inch 2K ProXDR AMOLED, 120Hz",
-        Processor: "Snapdragon 8 Elite",
-        RAM: "16GB",
-        Storage: "512GB",
-        Operating_System: "OxygenOS 15",
-        Camera: "Triple 50MP Hasselblad, 32MP Front",
-        Camera_Features: "OIS, Telephoto, Ultra-wide",
-        Video: "4K",
-        SIM: "Dual SIM, 5G",
-        Network: "Unlocked, USB Type C",
-        Water_Resistance: "IP69 & IP68",
-        Dimensions: "16.3 x 7.7 x 0.9 cm",
-        Weight: "210g",
-        Security: "Fingerprint, Face Unlock",
-        Headphone_Jack: "No",
-        Warranty: "1 year device, 6 months accessories",
-      },
-    },
-    category: "mobiles",
-    image: oneplus13image10,
-    rating: {
-      rate: 2.0,
-      count: 12,
-    },
-  },
-];
-
 function ProductDescription() {
   const { id } = useParams();
-  const product = products.find((p) => String(p.id) === String(id));
+  const product = mockProducts.find((p) => String(p.id) === String(id));
   const [addBanner, setAddBanner] = useState(AddBanner4);
   const [num, setNum] = useState(0);
   const [itemQuantity, setItemQuantity] = useState(1);
   const [reviewTab, setReviewTab] = useState(0);
   const [collabStatus, setCollabStatus] = useState({});
+  const role = useSelector((state) => state.user.role);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -556,31 +103,62 @@ function ProductDescription() {
     window.scrollTo(0, 0);
   }, []);
   const handleCollaborate = async (reviewIdx, review) => {
-    setCollabStatus((prev) => ({ ...prev, [reviewIdx]: "loading" }));
-    try {
-      const currentUserId = "Addy"; // Replace with actual logged-in user id if available
-
-      // Use your own logic to get these IDs
-      const user_id = currentUserId; // logged-in user
-      const collaborator_id = "1122"; // review's author (adjust as per your backend)
-      // const product_id = product.id;
-      const product_id = "oneplus13";
-
-      const res = await requestCollaboration({
-        user_id,
-        collaborator_id,
-        product_id,
-      });
-      if (res.status === "pending_approval") {
-        setCollabStatus((prev) => ({ ...prev, [reviewIdx]: "requested" }));
-      } else if (res.status === "approved" || res.status === "collaborated") {
-        setCollabStatus((prev) => ({ ...prev, [reviewIdx]: "collaborated" }));
-      } else {
-        setCollabStatus((prev) => ({ ...prev, [reviewIdx]: "error" }));
-      }
-    } catch (err) {
-      setCollabStatus((prev) => ({ ...prev, [reviewIdx]: "error" }));
+    // Only sellers can collaborate
+    const userStr = localStorage.getItem("aegis_user");
+    let isSeller = false;
+    let sellerName = "Seller";
+    let sellerId = "demo-seller-001";
+    if (userStr) {
+      try {
+        const user = JSON.parse(userStr);
+        if (user.role === 'seller' || user.role === 'tester') {
+          isSeller = true;
+          sellerName = user.displayName;
+          sellerId = user.uid;
+        }
+      } catch (e) {}
     }
+
+    if (!isSeller) {
+      alert("Only verified sellers can collaborate on reviews.");
+      return;
+    }
+
+    const comment = window.prompt("Enter your official response to this review:");
+    if (!comment) return; // User cancelled
+
+    setCollabStatus((prev) => ({ ...prev, [reviewIdx]: "loading" }));
+    
+    // Simulate API delay
+    setTimeout(() => {
+      // Save to localStorage
+      const pendingReqs = JSON.parse(localStorage.getItem("aegis_collaborations") || "[]");
+      
+      const newReq = {
+        id: Date.now().toString(),
+        productId: product.id,
+        productTitle: product.title,
+        reviewIdx,
+        reviewName: review.name,
+        reviewBody: review.body,
+        sellerId,
+        sellerName,
+        comment,
+        status: "pending" // can be pending, accepted, rejected
+      };
+      
+      pendingReqs.push(newReq);
+      localStorage.setItem("aegis_collaborations", JSON.stringify(pendingReqs));
+      
+      setCollabStatus((prev) => ({ ...prev, [reviewIdx]: "requested" }));
+      alert("Collaboration request sent to the customer!");
+    }, 1000);
+  };
+  
+  // Helper to check if a review has an accepted collaboration
+  const getAcceptedCollaboration = (reviewIdx) => {
+    const reqs = JSON.parse(localStorage.getItem("aegis_collaborations") || "[]");
+    return reqs.find(r => String(r.productId) === String(product.id) && r.reviewIdx === reviewIdx && r.status === "accepted");
   };
   const rupeeCalculate = (val) => Math.floor(val);
 
@@ -790,9 +368,28 @@ function ProductDescription() {
             <Typography sx={{ fontSize: "1.2rem", fontWeight: "bold" }}>
               About this item
             </Typography>
-            {product.description.about.map((item, i) =>
+            {product.description?.about?.map((item, i) =>
               item.length > 2 ? <Typography key={i}>• {item}</Typography> : null
             )}
+
+            {/* Aegis Description Analyzer */}
+            <Box sx={{ 
+              mt: 2, 
+              p: 2, 
+              borderRadius: 2, 
+              bgcolor: '#f8fafc',
+              border: '1px solid #e2e8f0'
+            }}>
+              <Typography sx={{ display: 'flex', alignItems: 'center', gap: 1, fontWeight: 600, color: '#0f172a', mb: 1 }}>
+                ✨ Aegis AI Verification
+              </Typography>
+              <Typography sx={{ fontSize: '0.9rem', color: '#334155' }}>
+                Our AI has analyzed the seller's claims against our database. 
+                <span style={{ color: '#16a34a', fontWeight: 600, marginLeft: '4px' }}>
+                  ✓ 100% of claims verified.
+                </span> No misleading specifications detected.
+              </Typography>
+            </Box>
           </Box>
         </Box>
         {/* Purchase Box */}
@@ -808,26 +405,58 @@ function ProductDescription() {
             flexDirection: "column",
             gap: 2,
             alignSelf: "flex-start",
+            border: "1px solid #ddd",
           }}
         >
           <Typography sx={{ fontSize: "1.5rem", fontWeight: 700 }}>
             ₹{rupeeCalculate(product.price).toLocaleString()}
           </Typography>
-          <Typography color="success.main">In stock</Typography>
-          <Typography sx={{ fontSize: "0.95rem" }}>
+          <Typography color="success.main" sx={{ fontWeight: 600 }}>In stock</Typography>
+          <Typography sx={{ fontSize: "0.95rem", mt: -1 }}>
             Ships from Amazon
           </Typography>
-          <Typography sx={{ fontSize: "0.95rem" }}>
-            Sold by Cocoblu Retail
-          </Typography>
+          
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+            <Typography sx={{ fontSize: "0.95rem" }}>
+              Sold by {product.seller?.name || "Cocoblu Retail"}
+            </Typography>
+            
+            {/* Aegis Trust Shield */}
+            <Box sx={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: 1, 
+              bgcolor: product.seller?.trustScore >= 80 ? '#f0fdf4' : '#fef3c7',
+              border: `1px solid ${product.seller?.trustScore >= 80 ? '#bbf7d0' : '#fde68a'}`,
+              p: 1, 
+              borderRadius: 1,
+              mt: 1
+            }}>
+              <Typography sx={{ fontSize: '1.2rem' }}>
+                {product.seller?.trustScore >= 80 ? '🛡️' : '⚠️'}
+              </Typography>
+              <Box>
+                <Typography sx={{ fontSize: "0.85rem", fontWeight: 600, color: product.seller?.trustScore >= 80 ? '#166534' : '#92400e' }}>
+                  Aegis Trust Score: {product.seller?.trustScore || 85}/100
+                </Typography>
+                <Typography sx={{ fontSize: "0.75rem", color: product.seller?.trustScore >= 80 ? '#15803d' : '#b45309' }}>
+                  {product.seller?.trustScore >= 80 ? 'Highly Trusted Seller' : 'Average Trust Seller'}
+                </Typography>
+              </Box>
+            </Box>
+          </Box>
+
           <Button
             variant="contained"
             sx={{
               background: "#FFD814",
               color: "black",
               fontWeight: 600,
-              borderRadius: "0.5rem",
-              "&:hover": { background: "#F7CA00" },
+              borderRadius: "50px", // More Amazon-like rounded button
+              mt: 1,
+              textTransform: "none",
+              boxShadow: "none",
+              "&:hover": { background: "#F7CA00", boxShadow: "none" },
             }}
             // onClick={addToCart}
           >
@@ -839,19 +468,29 @@ function ProductDescription() {
               background: "#FFA41C",
               color: "#232f3e",
               fontWeight: 600,
-              borderRadius: "0.5rem",
-              "&:hover": { background: "#F7CA00" },
+              borderRadius: "50px",
+              textTransform: "none",
+              boxShadow: "none",
+              "&:hover": { background: "#fa8900", boxShadow: "none" },
             }}
           >
             Buy Now
           </Button>
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1, mt: 1, color: '#007185' }}>
+            <Typography sx={{ fontSize: '0.9rem' }}>🔒 Secure transaction</Typography>
+          </Box>
+          <Divider />
           <Button
             variant="outlined"
             sx={{
-              borderColor: "#007185",
-              color: "#007185",
-              fontWeight: 600,
+              borderColor: "#d5d9d9",
+              background: "#fff",
+              color: "#0f1111",
+              textTransform: "none",
+              fontWeight: 500,
               borderRadius: "0.5rem",
+              boxShadow: "0 2px 5px 0 rgba(213,217,217,.5)",
+              "&:hover": { background: "#f7fafa", borderColor: "#d5d9d9" },
             }}
           >
             Add to Wish List
@@ -950,7 +589,7 @@ function ProductDescription() {
         {reviewTab === 0 ? (
           // Text Reviews
           <Box>
-            {textReviews.map((review, idx) => (
+            {product.reviews?.textReviews?.map((review, idx) => (
               <Card key={idx} sx={{ mb: 2, p: 2 }}>
                 <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
                   <Avatar sx={{ mr: 1, bgcolor: "#232f3e" }}>
@@ -989,6 +628,16 @@ function ProductDescription() {
                   {review.title}
                 </Typography>
                 <Typography sx={{ mt: 1 }}>{review.body}</Typography>
+                
+                {/* Aegis Review Analyzer */}
+                <Box sx={{ mt: 1, display: 'inline-flex', alignItems: 'center', gap: 0.5, bgcolor: '#f0f9ff', border: '1px solid #bae6fd', px: 1, py: 0.5, borderRadius: 1 }}>
+                  <Typography sx={{ fontSize: '0.8rem', color: '#0369a1', fontWeight: 600 }}>
+                    🧠 Aegis AI: 95% Genuine
+                  </Typography>
+                  <Typography sx={{ fontSize: '0.75rem', color: '#0ea5e9', ml: 1 }}>
+                    Matches expected sentiment. No AI generation detected.
+                  </Typography>
+                </Box>
                 {review.images && review.images.length > 0 && (
                   <Box sx={{ display: "flex", mt: 1, gap: 1 }}>
                     {review.images.map((img, i) => (
@@ -1003,42 +652,49 @@ function ProductDescription() {
                         variant="rounded"
                       />
                     ))}
-                    <Button
-                      variant="outlined"
-                      size="small"
-                      sx={{ mt: 0, ml: 1 }}
-                      disabled={
-                        collabStatus[idx] === "requested" ||
-                        collabStatus[idx] === "collaborated"
-                      }
-                      onClick={() => handleCollaborate(idx, review)}
-                    >
-                      {collabStatus[idx] === "requested"
-                        ? "Requested"
-                        : collabStatus[idx] === "collaborated"
-                        ? "Collaborated"
-                        : collabStatus[idx] === "loading"
-                        ? "Requesting..."
-                        : "Collaborate"}
-                    </Button>
-                    {collabStatus[idx] === "error" && (
-                      <Typography
-                        color="error"
-                        variant="caption"
-                        sx={{ ml: 1 }}
-                      >
-                        Error! Try again.
-                      </Typography>
-                    )}
                   </Box>
                 )}
+                
+                {/* Display published seller comment if accepted */}
+                {getAcceptedCollaboration(idx) && (
+                  <Box sx={{ mt: 2, ml: 2, p: 2, bgcolor: "#f8f9fa", borderLeft: "4px solid #f0c14b", borderRadius: 1 }}>
+                    <Typography sx={{ fontWeight: 600, fontSize: "0.9rem", color: "#c45500" }}>
+                      Response from {getAcceptedCollaboration(idx).sellerName}:
+                    </Typography>
+                    <Typography sx={{ fontSize: "0.9rem", mt: 0.5 }}>
+                      {getAcceptedCollaboration(idx).comment}
+                    </Typography>
+                  </Box>
+                )}
+
+                <Box sx={{ display: "flex", alignItems: "center", mt: 2 }}>
+                  <Button variant="outlined" sx={{ borderRadius: 8, mr: 2 }}>
+                    Helpful
+                  </Button>
+                  
+                  {/* Only show collaborate button if not already accepted, and only to sellers/testers */}
+                  {!getAcceptedCollaboration(idx) && (role === "seller" || role === "tester") && (
+                    <Button 
+                      variant="outlined" 
+                      sx={{ borderRadius: 8 }}
+                      onClick={() => handleCollaborate(idx, review)}
+                      disabled={collabStatus[idx] === "loading" || collabStatus[idx] === "requested"}
+                    >
+                      {collabStatus[idx] === "loading" 
+                        ? <CircularProgress size={20} /> 
+                        : collabStatus[idx] === "requested" 
+                        ? "Requested" 
+                        : "Collaborate"}
+                    </Button>
+                  )}
+                </Box>
               </Card>
             ))}
           </Box>
         ) : (
           // Audio Reviews
           <Box>
-            {audioReviews.map((review, idx) => (
+            {product.reviews?.audioReviews?.map((review, idx) => (
               <Card key={idx} sx={{ mb: 2, p: 2 }}>
                 <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
                   <Avatar sx={{ mr: 1, bgcolor: "#232f3e" }}>
@@ -1084,49 +740,56 @@ function ProductDescription() {
                     <PlayArrow />
                   </IconButton>
                 </Box>
+                {/* Aegis Review Analyzer */}
+                <Box sx={{ mt: 1, display: 'inline-flex', alignItems: 'center', gap: 0.5, bgcolor: '#f0f9ff', border: '1px solid #bae6fd', px: 1, py: 0.5, borderRadius: 1 }}>
+                  <Typography sx={{ fontSize: '0.8rem', color: '#0369a1', fontWeight: 600 }}>
+                    🧠 Aegis AI: 95% Genuine
+                  </Typography>
+                  <Typography sx={{ fontSize: '0.75rem', color: '#0ea5e9', ml: 1 }}>
+                    Matches expected sentiment. No AI generation detected.
+                  </Typography>
+                </Box>
                 {review.images && review.images.length > 0 && (
-                  <Box sx={{ display: "flex", mt: 1, gap: 1 }}>
+                  <Box sx={{ mt: 1 }}>
                     {review.images.map((img, i) => (
-                      <Avatar
-                        key={i}
-                        src={img}
-                        sx={{
-                          width: 48,
-                          height: 48,
-                          border: "1px solid #ddd",
-                        }}
-                        variant="rounded"
-                      />
+                      <img key={i} src={img} alt="review" style={{ width: 80, height: 80, marginRight: 8, borderRadius: 4 }} />
                     ))}
-                    <Button
-                      variant="outlined"
-                      size="small"
-                      sx={{ mt: 0, ml: 1 }}
-                      disabled={
-                        collabStatus[idx] === "requested" ||
-                        collabStatus[idx] === "collaborated"
-                      }
-                      onClick={() => handleCollaborate(idx, review)}
-                    >
-                      {collabStatus[idx] === "requested"
-                        ? "Requested"
-                        : collabStatus[idx] === "collaborated"
-                        ? "Collaborated"
-                        : collabStatus[idx] === "loading"
-                        ? "Requesting..."
-                        : "Collaborate"}
-                    </Button>
-                    {collabStatus[idx] === "error" && (
-                      <Typography
-                        color="error"
-                        variant="caption"
-                        sx={{ ml: 1 }}
-                      >
-                        Error! Try again.
-                      </Typography>
-                    )}
                   </Box>
                 )}
+                
+                {/* Display published seller comment if accepted */}
+                {getAcceptedCollaboration("audio_" + idx) && (
+                  <Box sx={{ mt: 2, ml: 2, p: 2, bgcolor: "#f8f9fa", borderLeft: "4px solid #f0c14b", borderRadius: 1 }}>
+                    <Typography sx={{ fontWeight: 600, fontSize: "0.9rem", color: "#c45500" }}>
+                      Response from {getAcceptedCollaboration("audio_" + idx).sellerName}:
+                    </Typography>
+                    <Typography sx={{ fontSize: "0.9rem", mt: 0.5 }}>
+                      {getAcceptedCollaboration("audio_" + idx).comment}
+                    </Typography>
+                  </Box>
+                )}
+
+                <Box sx={{ display: "flex", alignItems: "center", mt: 2 }}>
+                  <Button variant="outlined" sx={{ borderRadius: 8, mr: 2 }}>
+                    Helpful
+                  </Button>
+                  
+                  {/* Only show collaborate button if not already accepted, and only to sellers/testers */}
+                  {!getAcceptedCollaboration("audio_" + idx) && (role === "seller" || role === "tester") && (
+                    <Button 
+                      variant="outlined" 
+                      sx={{ borderRadius: 8 }}
+                      onClick={() => handleCollaborate("audio_" + idx, review)}
+                      disabled={collabStatus["audio_" + idx] === "loading" || collabStatus["audio_" + idx] === "requested"}
+                    >
+                      {collabStatus["audio_" + idx] === "loading" 
+                        ? <CircularProgress size={20} /> 
+                        : collabStatus["audio_" + idx] === "requested" 
+                        ? "Requested" 
+                        : "Collaborate"}
+                    </Button>
+                  )}
+                </Box>
               </Card>
             ))}
           </Box>

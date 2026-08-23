@@ -274,20 +274,20 @@ export default function SellerAddProduct() {
 
     try {
       
-    //   const formData = new FormData();
-    //   formData.append('image', image);
-    //   formData.append('name', form.name);
-    //   formData.append('price', form.price);
-    //   formData.append('description', form.description);
-    //   formData.append('category', form.category);
-    //   formData.append('stock', form.stock);
+      const formData = new FormData();
+      formData.append('image', image);
+      formData.append('name', form.name);
+      formData.append('price', form.price);
+      formData.append('description', form.description);
+      formData.append('category', form.category);
+      formData.append('stock', form.stock);
 
       // 2. Send data to backend API
-    //   const response = await axios.post('http://localhost:5000/api/products', formData, {
-    //     headers: {
-    //       'Content-Type': 'multipart/form-data'
-    //     }
-    //   });
+      const response = await axios.post('http://localhost:5000/api/products', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
 
       alert("Product added successfully!");
       navigate("/sellerdashboard");

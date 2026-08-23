@@ -34,6 +34,7 @@ import CustomerDashboard from "./Components/CustomerDashboard";
 import ProductPageAfterSearch from "./Components/ProductPageAfterSearch";
 import AmazonReviewForm from "./Components/AmazonReviewForm";
 import SellerAddProduct from "./Components/SellerAddProduct";
+import { mockProducts } from "./data/mockProducts";
 const cartFromLocalStorage = JSON.parse(
   localStorage.getItem("cart") || '{"items":[],"count":0}'
 );
@@ -68,14 +69,13 @@ function App() {
   };
 
   useEffect(() => {
-    const apiCall = async () => {
-      const response = await axios("https://fakestoreapi.com/products");
+    const loadProducts = () => {
       localStorage.setItem("cart", JSON.stringify(cart));
       localStorage.setItem("signedIn", JSON.stringify(signedIn));
-      dispatch(setProductsAction(response.data));
+      dispatch(setProductsAction(mockProducts));
     };
 
-    apiCall();
+    loadProducts();
   }, [cart, dispatch, signedIn]);
 
   useEffect(() => {
@@ -83,45 +83,22 @@ function App() {
     dispatch(SignedInAction(signedInFromLocalStorage));
   }, [dispatch]);
   useEffect(() => {
-    auth.onAuthStateChanged((authUser) => {
-      const initialUserState = {
-        uid: "",
-        email: "",
-        emailVerified: false,
-        displayName: "",
-        isAnonymous: false,
-        providerData: [
-          {
-            providerId: "",
-            uid: "",
-            displayName: "",
-            email: "",
-            phoneNumber: null,
-            photoURL: null,
-          },
-        ],
-        stsTokenManager: {
-          refreshToken: "",
-          accessToken: "",
-          expirationTime: 0,
-        },
-        createdAt: "",
-        lastLoginAt: "",
-        apiKey: "",
-        appName: "[DEFAULT]",
-      };
-
-      if (authUser) {
-        if (signedIn) {
-          dispatch(setUserAction(authUser));
-        } else {
-          dispatch(setUserAction(initialUserState));
-        }
-      } else {
-        dispatch(setUserAction(initialUserState));
+    // Load Aegis Demo User from LocalStorage to persist login across refreshes
+    const savedUserStr = localStorage.getItem("aegis_user");
+    if (savedUserStr) {
+      try {
+        const savedUser = JSON.parse(savedUserStr);
+        dispatch(setUserAction(savedUser));
+        dispatch(SignedInAction(true));
+      } catch (e) {
+        console.error("Failed to parse saved user", e);
       }
-    });
-  }, [dispatch, signedIn]);
+    } else {
+      // Not logged in
+      dispatch(setUserAction({}));
+      dispatch(SignedInAction(false));
+    }
+  }, [dispatch]);
 
   const [show, setShow] = useState(false);
 
@@ -212,7 +189,7 @@ function App() {
             }
           />
           <Route
-            path="/oneplus13/:id"
+            path="/product/:id"
             exact
             element={
               <>
@@ -223,7 +200,7 @@ function App() {
             }
           />
           <Route
-            path="/oneplus13"
+            path="/product/:id/search"
             element={
               <>
                 <NavBar />

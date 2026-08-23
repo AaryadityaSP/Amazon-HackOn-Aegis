@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import { Link, Navigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 import {
   Box,
   AppBar,
@@ -35,6 +37,8 @@ import {
   ResponsiveContainer,
   CartesianGrid,
 } from "recharts";
+import { io } from "socket.io-client";
+
 
 // Dummy Data
 const kpis = [
@@ -294,12 +298,13 @@ export default function CustomerDashboard() {
   const theme = useTheme();
   const [dashboardData, setDashboardData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const role = useSelector((state) => state.user.role);
   const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch('http://localhost:5000/api/customer/user123/dashboard');
+        const response = await fetch('http://localhost:5000/api/customer/demo-customer-001/dashboard');
         if (!response.ok) throw new Error('API request failed');
         const data = await response.json();
         setDashboardData(data);
@@ -311,7 +316,31 @@ export default function CustomerDashboard() {
     };
 
     fetchData();
+
+    // Socket.io real-time connection
+    const socket = io("http://localhost:5000", {
+      withCredentials: true,
+    });
+
+    socket.on("connect", () => {
+      console.log("Socket connected:", socket.id);
+      socket.emit("join-room", "dashboard-customer-user123");
+      socket.emit("join-room", "dashboard-customer");
+    });
+
+    socket.on("SCORE_UPDATED", (data) => {
+      console.log("Real-time event received (SCORE_UPDATED):", data);
+      fetchData(); // Refetch data
+    });
+
+    return () => {
+      socket.disconnect();
+    };
   }, []);
+
+  if (role !== "customer" && role !== "tester") {
+    return <Navigate to="/" replace />;
+  }
 
   if (loading) return <div>Loading dashboard...</div>;
   if (error) return <div>Error: {error}</div>;
@@ -413,6 +442,83 @@ export default function CustomerDashboard() {
             </Typography>
             <Typography sx={{ mt: 2, fontWeight: 600 }}>{policy}</Typography>
             <Typography sx={{ fontWeight: 600 }}>{cashback}</Typography>
+          </Card>
+        </Grid>
+
+        {/* Collaboration Requests */}
+        <Grid item xs={12}>
+          <Card
+            sx={{
+              p: 3,
+              borderRadius: 2,
+              boxShadow: "0 1px 4px 0 rgba(0,0,0,0.04)",
+              mb: 2,
+            }}
+          >
+            <Typography variant="h6" sx={{ mb: 2, fontWeight: 700 }}>
+              Collaboration Requests
+            </Typography>
+            <Typography variant="body2" sx={{ mb: 2 }}>
+              Sellers have requested to publish a response to your reviews. Review and accept below.
+            </Typography>
+            
+            {JSON.parse(localStorage.getItem("aegis_collaborations") || "[]").filter(req => req.status === "pending").length === 0 ? (
+              <Typography variant="body2" sx={{ color: "#767676", fontStyle: "italic" }}>
+                No pending requests.
+              </Typography>
+            ) : (
+              JSON.parse(localStorage.getItem("aegis_collaborations") || "[]")
+                .filter(req => req.status === "pending")
+                .map((req, idx) => (
+                  <Box key={req.id} sx={{ p: 2, mb: 2, border: "1px solid #ddd", borderRadius: 1 }}>
+                    <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+                      Product: {req.productTitle}
+                    </Typography>
+                    <Typography variant="body2" sx={{ mt: 1, bgcolor: "#f5f5f5", p: 1, borderRadius: 1 }}>
+                      <strong>Your Review:</strong> "{req.reviewBody}"
+                    </Typography>
+                    <Typography variant="body2" sx={{ mt: 1, bgcolor: "#fff3cd", p: 1, borderRadius: 1, borderLeft: "4px solid #ffc107" }}>
+                      <strong>Seller Response ({req.sellerName}):</strong> "{req.comment}"
+                    </Typography>
+                    <Box sx={{ mt: 2 }}>
+                      <Button 
+                        variant="contained" 
+                        color="success" 
+                        size="small" 
+                        sx={{ mr: 1 }}
+                        onClick={() => {
+                          const allReqs = JSON.parse(localStorage.getItem("aegis_collaborations") || "[]");
+                          const reqIdx = allReqs.findIndex(r => r.id === req.id);
+                          if (reqIdx > -1) {
+                            allReqs[reqIdx].status = "accepted";
+                            localStorage.setItem("aegis_collaborations", JSON.stringify(allReqs));
+                            // force re-render trick since we are injecting this without React state
+                            window.location.reload(); 
+                          }
+                        }}
+                      >
+                        Accept & Publish
+                      </Button>
+                      <Button 
+                        variant="outlined" 
+                        color="error" 
+                        size="small"
+                        onClick={() => {
+                          const allReqs = JSON.parse(localStorage.getItem("aegis_collaborations") || "[]");
+                          const reqIdx = allReqs.findIndex(r => r.id === req.id);
+                          if (reqIdx > -1) {
+                            allReqs[reqIdx].status = "rejected";
+                            localStorage.setItem("aegis_collaborations", JSON.stringify(allReqs));
+                            window.location.reload();
+                          }
+                        }}
+                      >
+                        Decline
+                      </Button>
+                    </Box>
+                  </Box>
+                ))
+            )}
           </Card>
         </Grid>
 

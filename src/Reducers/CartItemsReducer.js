@@ -4,7 +4,8 @@ const CartItemsReducer = (state = initialState, action) => {
   switch (action.type) {
     case "ADD_NEW_PRODUCT_TO_CART":
       let newItem = action.value;
-      newItem.price = Math.floor(newItem.price * 79.67);
+      // Price is already in INR
+      newItem.price = Math.floor(newItem.price);
       newItem.quantity = action.quantity;
       return {
         ...state,

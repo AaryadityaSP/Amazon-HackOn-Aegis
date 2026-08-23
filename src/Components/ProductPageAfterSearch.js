@@ -744,7 +744,7 @@ function ProductCard({ product }) {
             {product.fastDelivery}            
           </Typography>
         </Box>
-         {/* <DescriptionAnalyzer description={product.description.about} /> */}
+        <DescriptionAnalyzer description={product.description.about} />
         <Button
           variant="contained"
           color="warning"

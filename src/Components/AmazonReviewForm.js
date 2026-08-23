@@ -52,8 +52,10 @@ const AmazonReviewForm = ({ productId, product = productExample }) => {
   const [audioBlob, setAudioBlob] = useState(null);
   const [audioUrl, setAudioUrl] = useState("");
   const [audioFileName, setAudioFileName] = useState("");
+  const [transcript, setTranscript] = useState("");
   const mediaRecorderRef = useRef(null);
   const audioChunksRef = useRef([]);
+  const recognitionRef = useRef(null);
 
   // Toggle handler
   const handleReviewTypeChange = (_, newType) => {
@@ -105,6 +107,30 @@ const AmazonReviewForm = ({ productId, product = productExample }) => {
       setIsRecording(false);
     };
     mediaRecorder.start();
+
+    // Start Web Speech API transcription
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (SpeechRecognition) {
+      const recognition = new SpeechRecognition();
+      recognition.continuous = true;
+      recognition.interimResults = true;
+      recognition.lang = 'en-US';
+      
+      recognition.onresult = (event) => {
+        let currentTranscript = '';
+        for (let i = 0; i < event.results.length; i++) {
+          currentTranscript += event.results[i][0].transcript;
+        }
+        setTranscript(currentTranscript);
+      };
+      
+      recognitionRef.current = recognition;
+      try {
+        recognition.start();
+      } catch (err) {
+        console.error("Speech recognition error:", err);
+      }
+    }
   };
 
   const stopRecording = () => {
@@ -113,6 +139,9 @@ const AmazonReviewForm = ({ productId, product = productExample }) => {
       mediaRecorderRef.current.state !== "inactive"
     ) {
       mediaRecorderRef.current.stop();
+    }
+    if (recognitionRef.current) {
+      recognitionRef.current.stop();
     }
   };
 
@@ -160,6 +189,7 @@ const AmazonReviewForm = ({ productId, product = productExample }) => {
         await submitAudioReview({
           ...reviewData,
           audio_key,
+          transcript,
         });
         <Typography color="success.main" fontWeight={600}>
                 Review submitted successfully!
@@ -176,6 +206,7 @@ const AmazonReviewForm = ({ productId, product = productExample }) => {
       setAudioBlob(null);
       setAudioUrl("");
       setAudioFileName("");
+      setTranscript("");
       setTimeout(() => setSuccess(false), 3000);
     } catch (err) {
       // Optionally show error toast
@@ -481,6 +512,16 @@ const AmazonReviewForm = ({ productId, product = productExample }) => {
                 >
                   Audio review ready to submit.
                 </Typography>
+              )}
+              {transcript && (
+                <Box sx={{ mt: 2, p: 2, bgcolor: '#f9f9f9', borderRadius: 2, border: '1px solid #eee' }}>
+                  <Typography variant="body2" color="text.secondary" fontWeight={600} gutterBottom>
+                    Live Transcript (Web Speech API):
+                  </Typography>
+                  <Typography variant="body1" sx={{ fontStyle: 'italic' }}>
+                    "{transcript}"
+                  </Typography>
+                </Box>
               )}
             </Box>
           )}

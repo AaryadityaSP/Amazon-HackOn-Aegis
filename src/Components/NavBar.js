@@ -11,24 +11,24 @@ import { useDispatch, useSelector } from "react-redux";
 import setUserAction from "../Actions/setUserAction";
 import SignedInAction from "../Actions/SignedInAction";
 
+import MenuIcon from "@mui/icons-material/Menu";
+
 const menuItems = [
-  { label: "All", icon: <AiOutlineCaretDown style={{ fontSize: 18 }} /> },
-  { label: "Fresh" },
-  { label: "MX Player" },
-  { label: "Best Sellers" },
-  { label: "Mobiles" },
-  { label: "Today's Deals" },
-  { label: "Customer Service" },
-  { label: "Fashion" },
-  { label: "Electronics" },
-  { label: "Home & Kitchen" },
-  { label: "Amazon Pay" },
-  { label: "Computers" },
-  { label: "Books" },
+  { label: "All", icon: <MenuIcon style={{ fontSize: 24 }} />, path: "/" },
+  { label: "Fresh", path: "/" },
+  { label: "MX Player", path: "/" },
+  { label: "Sell (Aegis Shield)", path: "/sellerdashboard" },
+  { label: "Your Merit Score", path: "/customerdashboard" },
+  { label: "Best Sellers", path: "/" },
+  { label: "Mobiles", path: "/" },
+  { label: "Today's Deals", path: "/" },
+  { label: "Customer Service", path: "/" },
+  { label: "Amazon Pay", path: "/" },
 ];
 
 function NavBar(props) {
   const name = useSelector((state) => state.user.displayName);
+  const role = useSelector((state) => state.user.role);
   const cartCount = useSelector((state) => state.cart.count);
   const dispatch = useDispatch();
 
@@ -195,7 +195,6 @@ function NavBar(props) {
           </Link>
         </Toolbar>
       </AppBar>
-      {/* Second Row Menu Bar */}
       <Box
         sx={{
           background: "#232f3e",
@@ -203,12 +202,24 @@ function NavBar(props) {
           display: "flex",
           alignItems: "center",
           paddingLeft: 2,
+          overflowX: "auto",
+          whiteSpace: "nowrap",
         }}
       >
-        {menuItems.map((item) => (
+        {menuItems
+          .filter((item) => {
+            if (item.label === "Sell (Aegis Shield)") {
+              return role === "seller" || role === "tester";
+            }
+            if (item.label === "Your Merit Score") {
+              return role === "customer" || role === "tester";
+            }
+            return true;
+          })
+          .map((item) => (
           <Link
             key={item.label}
-            to="/"
+            to={item.path || "/"}
             style={{
               color: "#fff",
               textDecoration: "none",

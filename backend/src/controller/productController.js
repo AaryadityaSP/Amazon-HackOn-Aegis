@@ -1,128 +1,222 @@
-const AWS = require('aws-sdk');
-const axios = require('axios');
+// src/controller/productController.js
+// Product listing with AI Image Integrity Analysis
+
 const { v4: uuidv4 } = require('uuid');
+const { dynamoDB, s3 } = require('../config/aws');
+const { analyzeImage } = require('../services/imageAnalyzer');
+const { processEvent } = require('../services/trustEngine');
 
-// AWS Configuration
-AWS.config.update({
-  accessKeyId: process.env.AWS_ACCESS_KEY,
-  secretAccessKey: process.env.AWS_SECRET_KEY,
-  region: 'ap-south-1'
-});
-
-const s3 = new AWS.S3();
-const dynamoDb = new AWS.DynamoDB.DocumentClient();
-
+/**
+ * Get pre-signed S3 URL for reading
+ */
 const getSignedUrl = (bucket, key) => {
-  const params = {
+  return s3.getSignedUrl('getObject', {
     Bucket: bucket,
     Key: key,
-    Expires: 60 * 60 
-  };
-  return s3.getSignedUrl('getObject', params);
+    Expires: 60 * 60
+  });
 };
 
+/**
+ * POST /api/products
+ * Add a new product listing with AI image analysis
+ */
 exports.addProduct = async (req, res) => {
-  console.log("🚀 Starting product addition process");
-  
+  console.log('\n🚀 ═══ NEW PRODUCT LISTING ═══');
+
   try {
     const { name, price, description, category, stock } = req.body;
     const image = req.file;
+    const sellerId = req.user?.uid || req.body.sellerId || 'demo-seller-001';
 
     // 1. Validate input
     if (!image || !name || !price || !description || !category || !stock) {
-      console.error("❌ Validation failed: Missing fields");
-      return res.status(400).json({ error: 'All fields are required' });
+      console.error('❌ Validation failed: Missing fields');
+      return res.status(400).json({ error: 'All fields including image are required' });
     }
+
+    console.log(`   📦 Product: ${name} | Seller: ${sellerId}`);
 
     // 2. Upload image to S3
-    console.log("📤 Uploading image to S3...");
-    const s3Params = {
-      Bucket: 'aegis-seller-uploads',
-      Key: `${uuidv4()}_${image.originalname}`,
+    console.log('   📤 Uploading image to S3...');
+    const imageKey = `products/${sellerId}/${uuidv4()}_${image.originalname}`;
+    const s3Bucket = process.env.S3_BUCKET || 'aegis-seller-uploads';
+
+    const s3UploadResult = await s3.upload({
+      Bucket: s3Bucket,
+      Key: imageKey,
       Body: image.buffer,
       ContentType: image.mimetype
-    };
+    }).promise();
+    console.log('   ✅ S3 upload successful');
 
-    const s3UploadResult = await s3.upload(s3Params).promise();
-    console.log("✅ S3 upload successful:", s3UploadResult.Location);
-    
-    // 3. Generate pre-signed URL for Roboflow
-    console.log("🔗 Generating pre-signed URL...");
-    const signedImageUrl = getSignedUrl('aegis-seller-uploads', s3UploadResult.Key);
-    console.log("🔗 Signed URL:", signedImageUrl);
+    // 3. Run AI Image Integrity Analysis (replaces simple Roboflow call)
+    console.log('   🧠 Running Aegis Image Integrity Analysis...');
+    const imageAnalysis = await analyzeImage(image.buffer, image.originalname);
+    console.log(`   🎯 Image Integrity Score: ${imageAnalysis.imageIntegrityScore}/100`);
 
-    // 4. Get reality score from Roboflow
-    console.log("🤖 Calling Roboflow API...");
-    const roboflowResponse = await axios.post(
-      'https://serverless.roboflow.com/counterfeit-nike-shoes-detection/2',
-      {},
-      {
-        params: {
-          api_key: 'T8lhhZIv63NeMpEM2NYi',
-          image: signedImageUrl
-        },
-        timeout: 30000 // 30 seconds timeout
-      }
-    );
-
-    let realityScore = 0;
-    if (roboflowResponse.data.predictions?.length > 0) {
-      realityScore = Math.round(
-        Math.max(...roboflowResponse.data.predictions.map(p => p.confidence)) * 100
-      );
+    if (imageAnalysis.flagged) {
+      console.log(`   🚩 IMAGE FLAGGED: ${imageAnalysis.flagReasons.join(', ')}`);
     }
-    console.log("🎯 Reality Score:", realityScore);
+
+    // 4. Generate pre-signed URL
+    const signedImageUrl = getSignedUrl(s3Bucket, imageKey);
 
     // 5. Prepare product data
     const productData = {
       productId: uuidv4(),
-      sellerId: "TEMP_SELLER_123", // Hardcoded for now
-      name: name,
+      sellerId,
+      name,
       price: parseFloat(price),
-      description: description,
-      category: category,
+      description,
+      category,
       stock: parseInt(stock, 10),
-      realityScore: realityScore,
       imageUrl: s3UploadResult.Location,
-      signedImageUrl: signedImageUrl,
+      imageKey,
+      signedImageUrl,
+      // Aegis AI scores
+      imageIntegrityScore: imageAnalysis.imageIntegrityScore,
+      imageAnalysis: {
+        ela: imageAnalysis.checks.ela,
+        metadata: imageAnalysis.checks.metadata,
+        quality: imageAnalysis.checks.quality,
+        duplicateDetection: {
+          hash: imageAnalysis.checks.duplicateDetection?.hash,
+          isDuplicate: imageAnalysis.checks.duplicateDetection?.isDuplicate
+        }
+      },
+      flagged: imageAnalysis.flagged,
+      flagReasons: imageAnalysis.flagReasons,
+      status: imageAnalysis.flagged ? 'under_review' : 'active',
       createdAt: new Date().toISOString()
     };
-    console.log("📝 Product Data:", productData);
 
     // 6. Save to DynamoDB
-    console.log("💾 Saving to DynamoDB...");
-    const dynamoParams = {
+    console.log('   💾 Saving to DynamoDB...');
+    await dynamoDB.put({
       TableName: 'SellerListings',
       Item: productData
-    };
+    }).promise();
+    console.log('   ✅ Product saved successfully');
 
-    await dynamoDb.put(dynamoParams).promise();
-    console.log("💾 DynamoDB save successful");
+    // 7. Process trust engine event
+    const trustUpdate = processEvent('LISTING_CREATED', {
+      productId: productData.productId,
+      sellerId,
+      imageIntegrityScore: imageAnalysis.imageIntegrityScore,
+      flagged: imageAnalysis.flagged
+    });
+
+    // 8. Emit real-time events
+    const io = req.app.get('io');
+    if (io) {
+      io.emit('LISTING_CREATED', {
+        productId: productData.productId,
+        name,
+        sellerId,
+        imageIntegrityScore: imageAnalysis.imageIntegrityScore,
+        flagged: imageAnalysis.flagged,
+        timestamp: new Date().toISOString()
+      });
+
+      if (imageAnalysis.flagged) {
+        io.emit('LISTING_FLAGGED', {
+          productId: productData.productId,
+          reasons: imageAnalysis.flagReasons,
+          timestamp: new Date().toISOString()
+        });
+      }
+
+      if (trustUpdate) {
+        io.emit('SCORE_UPDATED', trustUpdate);
+      }
+    }
+
+    // 9. If flagged, create a flag record
+    if (imageAnalysis.flagged) {
+      try {
+        await dynamoDB.put({
+          TableName: 'Flags',
+          Item: {
+            flagId: uuidv4(),
+            type: 'listing',
+            targetId: productData.productId,
+            sellerId,
+            severity: imageAnalysis.imageIntegrityScore < 30 ? 'high' : 'medium',
+            reasons: imageAnalysis.flagReasons,
+            score: imageAnalysis.imageIntegrityScore,
+            status: 'pending',
+            createdAt: new Date().toISOString()
+          }
+        }).promise();
+      } catch (e) {
+        console.warn('⚠️ Could not save flag record:', e.message);
+      }
+    }
+
+    console.log(`   ✅ Listing complete! Status: ${productData.status}\n`);
 
     res.status(201).json({
       success: true,
-      product: productData
+      product: {
+        productId: productData.productId,
+        name: productData.name,
+        imageUrl: productData.imageUrl,
+        imageIntegrityScore: productData.imageIntegrityScore,
+        flagged: productData.flagged,
+        flagReasons: productData.flagReasons,
+        status: productData.status
+      },
+      imageAnalysis: imageAnalysis.checks
     });
 
   } catch (error) {
     console.error('❌ Error in addProduct:', error);
-    
-    // Detailed error response
-    const errorResponse = {
+    res.status(500).json({
       error: 'Internal server error',
       message: error.message
-    };
+    });
+  }
+};
 
-    if (error.response) {
-      console.error('🔴 Roboflow Response Error:', error.response.data);
-      errorResponse.roboflowError = error.response.data;
-    }
-    
-    if (error.code === 'NetworkingError') {
-      console.error('🌐 Network Error:', error.message);
-      errorResponse.networkError = true;
+/**
+ * GET /api/products/:productId
+ * Get a single product with its analysis data
+ */
+exports.getProduct = async (req, res) => {
+  try {
+    const result = await dynamoDB.get({
+      TableName: 'SellerListings',
+      Key: { productId: req.params.productId }
+    }).promise();
+
+    if (!result.Item) {
+      return res.status(404).json({ error: 'Product not found' });
     }
 
-    res.status(500).json(errorResponse);
+    res.json({ success: true, product: result.Item });
+  } catch (error) {
+    console.error('❌ Get product error:', error);
+    res.status(500).json({ error: 'Failed to get product' });
+  }
+};
+
+/**
+ * GET /api/products/seller/:sellerId
+ * Get all products for a seller
+ */
+exports.getSellerProducts = async (req, res) => {
+  try {
+    const result = await dynamoDB.query({
+      TableName: 'SellerListings',
+      IndexName: 'SellerIndex',
+      KeyConditionExpression: 'sellerId = :sid',
+      ExpressionAttributeValues: { ':sid': req.params.sellerId }
+    }).promise();
+
+    res.json({ success: true, products: result.Items || [] });
+  } catch (error) {
+    console.error('❌ Get seller products error:', error);
+    res.json({ success: true, products: [] });
   }
 };
